@@ -1,5 +1,6 @@
 package me.line.games.anonymous;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -12,39 +13,55 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import me.line.games.common.domain.CommonResponse;
-import me.line.games.common.domain.SearchCondition;
+import me.line.games.anonymous.vo.ModifyPostRequest;
+import me.line.games.anonymous.vo.NewPostRequest;
+import me.line.games.anonymous.vo.PostDetailResponse;
+import me.line.games.anonymous.vo.PostResponse;
+import me.line.games.common.domain.Post;
+import me.line.games.common.domain.PostDetail;
+import me.line.games.common.vo.CommonResponse;
+import me.line.games.common.vo.SearchCondition;
 
 @RestController
-public class AnonymousController {
-	private AnonymousService anonymousService;
+public class AnonymousPostController {
+	private AnonymousPostService anonymousService;
 
-	public AnonymousController(AnonymousService anonymousService) {
+	public AnonymousPostController(AnonymousPostService anonymousService) {
 		this.anonymousService = anonymousService;
 	}
 
+	@SuppressWarnings("unused")
 	@GetMapping("/posts/{id}")
-	public ResponseEntity<AnonymousPostDetail> getPost(@PathVariable String id) {
+	public ResponseEntity<PostDetailResponse> getPost(@PathVariable String id) {
 		// TODO find 라는 메서드의 결과가 0일때 처리
-		AnonymousPostDetail post = anonymousService.find(id);
-		return new ResponseEntity<AnonymousPostDetail>(post, HttpStatus.OK);
+		PostDetail post = anonymousService.find(id);
+
+		// TODO @SuppressWarnings 지우기
+		// TODO MapStruct 적용하기
+		PostDetailResponse response = new PostDetailResponse();
+		return new ResponseEntity<PostDetailResponse>(response, HttpStatus.OK);
 	}
 
+	@SuppressWarnings("unused")
 	@GetMapping("/posts")
-	public ResponseEntity<List<AnonymousPost>> getPosts(@RequestParam String searchType,
-			@RequestParam String searchText, @RequestParam int page, @RequestParam int row) {
+	public ResponseEntity<List<PostResponse>> getPosts(@RequestParam String searchType, @RequestParam String searchText,
+			@RequestParam int page, @RequestParam int row) {
 
 		SearchCondition condition = new SearchCondition(searchType, searchText, page, row);
 
+		// TODO @SuppressWarnings 지우기
 		// TODO find 라는 메서드의 결과가 0일때 처리
-		List<AnonymousPost> post = anonymousService.findAll(condition);
-		return new ResponseEntity<List<AnonymousPost>>(post, HttpStatus.OK);
+		List<Post> posts = anonymousService.findAll(condition);
+
+		// TODO MapStruct 적용하기
+		List<PostResponse> response = new ArrayList<>();
+		return new ResponseEntity<List<PostResponse>>(response, HttpStatus.OK);
 	}
 
 	@PostMapping("/posts")
 	public ResponseEntity<CommonResponse> save(NewPostRequest request) {
 		// TODO request to vo 전환
-		AnonymousPost post = new AnonymousPost();
+		Post post = new Post();
 
 		// TODO insert 결과가 0이면 exception 처리
 		anonymousService.save(post);
@@ -57,7 +74,7 @@ public class AnonymousController {
 	@PutMapping("/posts/{id}")
 	public ResponseEntity<CommonResponse> modify(ModifyPostRequest request) {
 		// TODO request to vo 전환
-		AnonymousPost post = new AnonymousPost();
+		Post post = new Post();
 
 		// TODO update 결과가 0이면 exception 처리
 		anonymousService.modify(post);

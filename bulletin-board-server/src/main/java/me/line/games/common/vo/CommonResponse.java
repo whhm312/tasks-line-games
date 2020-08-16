@@ -1,4 +1,4 @@
-package me.line.games.common.domain;
+package me.line.games.common.vo;
 
 import lombok.Getter;
 import lombok.Setter;
