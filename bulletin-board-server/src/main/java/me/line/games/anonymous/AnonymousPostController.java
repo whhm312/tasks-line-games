@@ -1,6 +1,5 @@
 package me.line.games.anonymous;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -15,8 +14,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import me.line.games.anonymous.vo.ModifyPostRequest;
 import me.line.games.anonymous.vo.NewPostRequest;
+import me.line.games.anonymous.vo.NewPostResponse;
 import me.line.games.anonymous.vo.PostDetailResponse;
-import me.line.games.anonymous.vo.PostResponse;
+import me.line.games.anonymous.vo.PostsResponse;
 import me.line.games.common.domain.Post;
 import me.line.games.common.domain.PostDetail;
 import me.line.games.common.vo.CommonResponse;
@@ -44,7 +44,7 @@ public class AnonymousPostController {
 
 	@SuppressWarnings("unused")
 	@GetMapping("/posts")
-	public ResponseEntity<List<PostResponse>> getPosts(@RequestParam String searchType, @RequestParam String searchText,
+	public ResponseEntity<PostsResponse> getPosts(@RequestParam String searchType, @RequestParam String searchText,
 			@RequestParam int page, @RequestParam int row) {
 
 		SearchCondition condition = new SearchCondition(searchType, searchText, page, row);
@@ -54,21 +54,21 @@ public class AnonymousPostController {
 		List<Post> posts = anonymousService.findAll(condition);
 
 		// TODO MapStruct 적용하기
-		List<PostResponse> response = new ArrayList<>();
-		return new ResponseEntity<List<PostResponse>>(response, HttpStatus.OK);
+		PostsResponse response = new PostsResponse();
+		return new ResponseEntity<PostsResponse>(response, HttpStatus.OK);
 	}
 
 	@PostMapping("/posts")
-	public ResponseEntity<CommonResponse> save(NewPostRequest request) {
+	public ResponseEntity<NewPostResponse> save(NewPostRequest request) {
 		// TODO request to vo 전환
 		Post post = new Post();
 
 		// TODO insert 결과가 0이면 exception 처리
 		anonymousService.save(post);
 
-		CommonResponse body = new CommonResponse();
+		NewPostResponse body = new NewPostResponse();
 		body.setSuccess();
-		return new ResponseEntity<CommonResponse>(body, HttpStatus.CREATED);
+		return new ResponseEntity<NewPostResponse>(body, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/posts/{id}")

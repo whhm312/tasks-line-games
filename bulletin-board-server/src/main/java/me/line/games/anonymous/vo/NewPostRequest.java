@@ -1,7 +1,13 @@
 package me.line.games.anonymous.vo;
 
-public class NewPostRequest {
+import lombok.Getter;
+import lombok.Setter;
 
-	// TODO Vaildation
-	// TODO 파일 첨부
+@Setter
+@Getter
+// TODO Vaildation
+public class NewPostRequest {
+	private String nickName;
+	private String title;
+	private String content;
 }

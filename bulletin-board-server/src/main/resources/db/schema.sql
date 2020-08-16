@@ -3,7 +3,7 @@ CREATE TABLE TBL_BOARD_POST (
   nick_name VARCHAR(200) NOT NULL,
   user_id VARCHAR(50) NOT NULL,
   title VARCHAR(500) NOT NULL,
-  content CLOB NOT NULL,
+  content VARCHAR(2000) NOT NULL,
   hit INT,
   delete_yn CHAR(1) NOT NULL,
   register_date DATE NOT NULL,
