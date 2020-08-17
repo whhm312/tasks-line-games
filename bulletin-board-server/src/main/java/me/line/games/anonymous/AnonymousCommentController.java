@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import me.line.games.anonymous.service.AnonymousCommentService;
 import me.line.games.anonymous.vo.CommentResponse;
 import me.line.games.anonymous.vo.ModifyCommentRequest;
 import me.line.games.anonymous.vo.NewCommentRequest;

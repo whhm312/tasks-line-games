@@ -6,8 +6,8 @@ CREATE TABLE TBL_BOARD_POST (
   content VARCHAR(2000) NOT NULL,
   hit INT,
   delete_yn CHAR(1) NOT NULL,
-  register_date DATE NOT NULL,
-  last_update_date DATE NULL
+  register_date TIMESTAMP NOT NULL,
+  last_update_date TIMESTAMP NULL
 );
 
 CREATE TABLE TBL_BOARD_POST_COMMENT (

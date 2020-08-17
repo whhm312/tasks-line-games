@@ -2,9 +2,11 @@ package me.line.games.common.vo;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Setter
 @Getter
+@ToString
 public class SearchCondition {
 	private String searchType;
 	private String searchText;
@@ -18,4 +20,17 @@ public class SearchCondition {
 		this.row = row;
 	}
 
+	public int getStartNum() {
+		if (page == 1) {
+			return page;
+		}
+		return (page - 1) + row;
+	}
+
+	public int getEndNum() {
+		if (page == 1) {
+			return row;
+		}
+		return page * row;
+	}
 }

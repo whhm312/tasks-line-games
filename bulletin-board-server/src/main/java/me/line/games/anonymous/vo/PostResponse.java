@@ -11,4 +11,5 @@ public class PostResponse {
 	private String title;
 	private String registerDate;
 	private int hit;
+	private int commentCount;
 }

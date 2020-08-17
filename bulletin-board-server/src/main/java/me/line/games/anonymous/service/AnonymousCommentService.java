@@ -1,4 +1,4 @@
-package me.line.games.anonymous;
+package me.line.games.anonymous.service;
 
 import java.util.List;
 
