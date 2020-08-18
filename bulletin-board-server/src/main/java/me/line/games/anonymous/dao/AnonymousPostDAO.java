@@ -1,20 +1,19 @@
 package me.line.games.anonymous.dao;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.h2.util.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
+import me.line.games.common.domain.Comment;
+import me.line.games.common.domain.CommonComment;
 import me.line.games.common.domain.Post;
 import me.line.games.common.domain.PostDetail;
+import me.line.games.common.domain.SubComment;
 import me.line.games.common.exception.FailedCreateContentException;
 import me.line.games.common.exception.ResourceNoContentException;
 import me.line.games.common.vo.SearchCondition;
@@ -23,71 +22,78 @@ import me.line.games.common.vo.SearchCondition;
 public class AnonymousPostDAO {
 
 	JdbcTemplate jdbcTemplate;
-	SimpleJdbcInsert simpleJdbcInsert;
 
 	public AnonymousPostDAO(JdbcTemplate jdbcTemplate) {
 		this.jdbcTemplate = jdbcTemplate;
-		simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate);
 	}
 
 	public int insert(Post post) {
-		simpleJdbcInsert.withTableName("TBL_BOARD_POST").setGeneratedKeyName("seq");
+		StringBuilder query = new StringBuilder();
+		query.append("INSERT INTO TBL_BOARD_POST ( ");
+		query.append("  SEQ, NICK_NAME, USER_ID, ");
+		query.append("  TITLE, CONTENT, HIT, ");
+		query.append("  DELETE_YN, REGISTER_DATE ");
+		query.append(") ");
+		query.append("VALUES ( ");
+		query.append("  NEXTVAL('SEQ_BOARD_POST'), ?, ?, ");
+		query.append("  ?, ?, 0, ");
+		query.append("  'N', SYSDATE ");
+		query.append(")");
 
-		Map<String, Object> parameters = new HashMap<String, Object>();
-		parameters.put("nick_name", post.getNickName());
-		parameters.put("user_id", post.getUserId());
-		parameters.put("title", post.getTitle());
-		parameters.put("content", post.getContent());
-		parameters.put("hit", 0);
-		parameters.put("delete_yn", "N");
-		parameters.put("register_date", LocalDateTime.now());
+		List<Object> args = new ArrayList<>();
+		args.add(post.getNickName());
+		args.add(post.getUserId());
+		args.add(post.getTitle());
+		args.add(post.getContent());
 
-		Number seq = simpleJdbcInsert.executeAndReturnKey(parameters);
-		if (seq.intValue() < 1) {
+		int result = jdbcTemplate.update(query.toString(), args.toArray());
+		if (result < 1) {
 			throw new FailedCreateContentException("Failed to INSERT a Post that " + post.toString() + ".");
 		}
-		return seq.intValue();
+
+		query.setLength(0);
+		query.append("SELECT CURRVAL('SEQ_BOARD_POST')");
+		return jdbcTemplate.queryForObject(query.toString(), Integer.class);
 	}
 
 	public List<Post> selectAll(SearchCondition condition) {
-		List<Object> argList = new ArrayList<>();
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT * ");
 		query.append("FROM ( ");
-		query.append("SELECT ROWNUM() AS rnum, ");
-		query.append("SEQ AS seq, ");
-		query.append("NICK_NAME AS nickName, ");
-		query.append("USER_ID AS userId, ");
-		query.append("TITLE AS title, ");
-		query.append("CONTENT AS content, ");
-		query.append("HIT AS hit, ");
-		query.append("DELETE_YN AS deleteYn, ");
-		query.append("REGISTER_DATE AS registerDate, ");
-		query.append("LAST_UPDATE_DATE AS lastUpdateDate ");
-		query.append("FROM TBL_BOARD_POST AS P ");
-		query.append(
-				"LEFT JOIN (SELECT POST_SEQ, COUNT(*) AS commentCount FROM TBL_BOARD_POST_COMMENT GROUP BY POST_SEQ) AS C ON P.SEQ = C.POST_SEQ ");
-		query.append("WHERE delete_yn = 'N' ");
 
+		query.append("SELECT ROWNUM() AS RNUM, *, ");
+		query.append("  IFNULL(COMM_CNT, 0) AS COMMENT_COUNT ");
+
+		query.append("FROM TBL_BOARD_POST AS P LEFT JOIN ( ");
+
+		query.append("    SELECT POST_SEQ, COUNT(*) AS COMM_CNT ");
+		query.append("      FROM TBL_BOARD_POST_COMMENT ");
+		query.append("     WHERE DELETE_YN = 'N' ");
+		query.append("     GROUP BY POST_SEQ ");
+
+		query.append(") AS C ON P.SEQ = C.POST_SEQ ");
+
+		query.append("WHERE P.DELETE_YN = 'N' ");
+
+		List<Object> args = new ArrayList<>();
 		if (!StringUtils.isNullOrEmpty(condition.getSearchText())) {
-			argList.add(condition.getSearchText());
+			args.add(condition.getSearchText());
 
-			if ("title+content".equals(condition.getSearchType())) {
-				query.append("AND (title LIKE %?% OR content LIKE %?%) ");
-				argList.add(condition.getSearchText());
+			if ("TITLE+CONTENT".equals(condition.getSearchType())) {
+				query.append("AND (TITLE LIKE %?% OR CONTENT LIKE %?%) ");
+				args.add(condition.getSearchText());
 			} else {
 				query.append("AND " + condition.getSearchType() + " LIKE %?% ");
 			}
 		}
 
 		query.append(") ");
-		query.append("WHERE rnum >= ? AND rnum <= ? ");
+		query.append("WHERE RNUM >= ? AND RNUM <= ? ");
 
-		argList.add(condition.getStartNum());
-		argList.add(condition.getEndNum());
+		args.add(condition.getStartNum());
+		args.add(condition.getEndNum());
 
-		List<Post> result = jdbcTemplate.query(query.toString(), argList.toArray(),
-				new BeanPropertyRowMapper<Post>(Post.class));
+		List<Post> result = jdbcTemplate.query(query.toString(), args.toArray(), new BeanPropertyRowMapper<Post>(Post.class));
 
 		if (result.size() < 1) {
 			throw new ResourceNoContentException("Search Contition is that " + condition.toString() + ".");
@@ -96,20 +102,20 @@ public class AnonymousPostDAO {
 	}
 
 	public int selectAllCount(SearchCondition condition) {
-		List<Object> argList = new ArrayList<>();
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT COUNT(*) ");
 		query.append("  FROM ( ");
 		query.append("    SELECT * ");
 		query.append("      FROM TBL_BOARD_POST ");
-		query.append("WHERE delete_yn = 'N' ");
+		query.append("WHERE DELETE_YN = 'N' ");
 
+		List<Object> args = new ArrayList<>();
 		if (!StringUtils.isNullOrEmpty(condition.getSearchText())) {
-			argList.add(condition.getSearchText());
+			args.add(condition.getSearchText());
 
-			if ("title+content".equals(condition.getSearchType())) {
-				query.append("     AND (title LIKE %?% OR content LIKE %?%) ");
-				argList.add(condition.getSearchText());
+			if ("TITLE+CONTENT".equals(condition.getSearchType())) {
+				query.append("     AND (TITLE LIKE %?% OR CONTENT LIKE %?%) ");
+				args.add(condition.getSearchText());
 			} else {
 				query.append("     AND " + condition.getSearchType() + " LIKE %?% ");
 			}
@@ -117,74 +123,206 @@ public class AnonymousPostDAO {
 
 		query.append("       ) ");
 
-		return jdbcTemplate.queryForObject(query.toString(), argList.toArray(), Integer.class);
+		return jdbcTemplate.queryForObject(query.toString(), args.toArray(), Integer.class);
 	}
 
-	public PostDetail select(String postId) {
-		String query = "SELECT * FROM TBL_BOARD_POST WHERE seq = ? AND delete_yn = 'N' ";
+	public PostDetail select(int postSeq) {
+		String query = "SELECT * FROM TBL_BOARD_POST WHERE SEQ = ? AND DELETE_YN = 'N' ";
 
 		try {
-			return jdbcTemplate.queryForObject(query, new Object[] { postId },
-					new BeanPropertyRowMapper<PostDetail>(PostDetail.class));
+			return jdbcTemplate.queryForObject(query, new Object[] { postSeq }, new BeanPropertyRowMapper<PostDetail>(PostDetail.class));
 		} catch (EmptyResultDataAccessException e) {
-			throw new ResourceNoContentException("The Post SEQ is " + postId + ". Cannot SELECT the Post.");
+			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot SELECT the Post.");
 		}
 	}
 
-	public void updateHit(String postId) {
+	public void updateHit(int postSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST ");
 		query.append("SET HIT = HIT + 1 ");
-		query.append("WHERE seq = ? ");
-		query.append("  AND delete_yn = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { postId });
+		query.append("WHERE SEQ = ? ");
+		query.append("  AND DELETE_YN = 'N' ");
+		int result = jdbcTemplate.update(query.toString(), new Object[] { postSeq });
 		if (result == 0) {
-			throw new ResourceNoContentException("The Post SEQ is " + postId + ". Cannot UPDATE hit of the Post.");
+			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot UPDATE hit of the Post.");
 		}
 	}
 
 	public void update(Post post) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST ");
-		query.append("SET title = ?, ");
-		query.append("    content = ?, ");
-		query.append("    last_update_date = sysdate ");
-		query.append("WHERE seq = ? ");
-		query.append("  AND delete_yn = 'N' ");
-		int result = jdbcTemplate.update(query.toString(),
-				new Object[] { post.getTitle(), post.getContent(), post.getSeq() });
+		query.append("SET TITLE = ?, ");
+		query.append("    CONTENT = ?, ");
+		query.append("    LAST_UPDATE_DATE = SYSDATE ");
+		query.append("WHERE USER_ID = ? ");
+		query.append("  AND SEQ = ? ");
+		query.append("  AND DELETE_YN = 'N' ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(post.getTitle());
+		args.add(post.getContent());
+		args.add(post.getUserId());
+		args.add(post.getSeq());
+
+		int result = jdbcTemplate.update(query.toString(), args.toArray());
 		if (result == 0) {
 			throw new ResourceNoContentException("The Post SEQ is " + post.getSeq() + ". Cannot UPDATE the Post.");
 		}
 	}
 
-	public void deletePost(String userId, String postId) {
+	public void deletePost(String userId, int postSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST ");
-		query.append("SET delete_yn = 'Y', ");
-		query.append("    last_update_date = sysdate ");
-		query.append("WHERE user_id = ? ");
-		query.append("  AND seq = ? ");
-		query.append("  AND delete_yn = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postId });
+		query.append("SET DELETE_YN = 'Y', ");
+		query.append("    LAST_UPDATE_DATE = SYSDATE ");
+		query.append("WHERE USER_ID = ? ");
+		query.append("  AND SEQ = ? ");
+		query.append("  AND DELETE_YN = 'N' ");
+		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
 		if (result == 0) {
-			throw new ResourceNoContentException("The Post SEQ is " + postId + ". Cannot DELETE the Post.");
+			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot DELETE the Post.");
 		}
 	}
 
-	public void deleteComments(String userId, String postId) {
+	public void deleteComments(String userId, int postSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST_COMMENT ");
-		query.append("SET delete_yn = 'Y', ");
-		query.append("    last_update_date = sysdate ");
-		query.append("WHERE user_id = ? ");
-		query.append("  AND post_seq = ? ");
-		query.append("  AND delete_yn = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postId });
+		query.append("SET DELETE_YN = 'Y', ");
+		query.append("    LAST_UPDATE_DATE = SYSDATE ");
+		query.append("WHERE USER_ID = ? ");
+		query.append("  AND POST_SEQ = ? ");
+		query.append("  AND DELETE_YN = 'N' ");
+		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
+		if (result == 0) {
+			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot DELETE the Comments in the Post.");
+		}
+	}
+
+	public int insert(CommonComment comment) {
+		StringBuilder query = new StringBuilder();
+		query.append("INSERT INTO TBL_BOARD_POST_COMMENT ( ");
+		query.append("  SEQ, PARENT_COMMENT_SEQ, POST_SEQ, ");
+		query.append("  NICK_NAME, USER_ID, CONTENT, ");
+		query.append("  DELETE_YN, REGISTER_DATE ");
+		query.append(") ");
+		query.append("VALUES ( ");
+		query.append("  NEXTVAL('SEQ_BOARD_POST_COMMENT'), ?, ?, ");
+		query.append("  ?, ?, ?, ");
+		query.append("  'N', SYSDATE ");
+		query.append(")");
+
+		List<Object> args = new ArrayList<>();
+		args.add(comment.getSeq());
+		args.add(comment.getPostSeq());
+		args.add(comment.getNickName());
+		args.add(comment.getUserId());
+		args.add(comment.getContent());
+
+		int result = jdbcTemplate.update(query.toString(), args.toArray());
+		if (result == 0) {
+			throw new FailedCreateContentException("Failed to INSERT a Comment that " + comment.toString() + ".");
+		}
+
+		query.setLength(0);
+		query.append("SELECT CURRVAL('SEQ_BOARD_POST_COMMENT')");
+		return jdbcTemplate.queryForObject(query.toString(), Integer.class);
+	}
+
+	public void update(Comment comment) {
+		StringBuilder query = new StringBuilder();
+		query.append("UPDATE TBL_BOARD_POST_COMMENT ");
+		query.append("SET CONTENT = ?, ");
+		query.append("    LAST_UPDATE_DATE = SYSDATE ");
+		query.append("WHERE SEQ = ? ");
+		query.append("  AND POST_SEQ = ? ");
+		query.append("  AND USER_ID = ? ");
+		query.append("  AND DELETE_YN = 'N' ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(comment.getContent());
+		args.add(comment.getSeq());
+		args.add(comment.getPostSeq());
+		args.add(comment.getUserId());
+		int result = jdbcTemplate.update(query.toString(), args.toArray());
+		if (result == 0) {
+			throw new ResourceNoContentException("The Comment SEQ is " + comment.getSeq() + ". Cannot UPDATE the Comment.");
+		}
+	}
+
+	public void deleteComment(String userId, int postSeq, int commentSeq) {
+		StringBuilder query = new StringBuilder();
+		query.append("UPDATE TBL_BOARD_POST_COMMENT ");
+		query.append("SET DELETE_YN = 'Y', ");
+		query.append("    LAST_UPDATE_DATE = SYSDATE ");
+		query.append("WHERE USER_ID = ? ");
+		query.append("  AND POST_SEQ = ? ");
+		query.append("  AND SEQ = ? ");
+		query.append("  AND DELETE_YN = 'N' ");
+		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq, commentSeq });
 		if (result == 0) {
 			throw new ResourceNoContentException(
-					"The Post SEQ is " + postId + ". Cannot DELETE the Comments in the Post.");
+					"The Post SEQ is " + postSeq + " and Comment SEQ is " + commentSeq + ". Cannot DELETE the Comment in the Post.");
 		}
+	}
+
+	public void isExistPost(int postSeq) {
+		select(postSeq);
+	}
+
+	public Comment selectComment(int postSeq, int commentSeq) {
+		StringBuilder query = new StringBuilder();
+		query.append("SELECT *  ");
+		query.append("  FROM TBL_BOARD_POST_COMMENT ");
+		query.append(" WHERE POST_SEQ = ? ");
+		query.append("   AND SEQ = ? ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(postSeq);
+		args.add(commentSeq);
+
+		try {
+			return jdbcTemplate.queryForObject(query.toString(), args.toArray(), new BeanPropertyRowMapper<Comment>(Comment.class));
+		} catch (EmptyResultDataAccessException e) {
+			throw new ResourceNoContentException("The Post SEQ is " + postSeq + " and Comment SEQ is " + commentSeq + ".");
+		}
+	}
+
+	public List<SubComment> selectSubComments(int postSeq, int commentSeq) {
+		String query = "SELECT * FROM TBL_BOARD_POST_COMMENT WHERE POST_SEQ = ? AND PARENT_COMMENT_SEQ = ? ";
+
+		List<Object> args = new ArrayList<>();
+		args.add(postSeq);
+		args.add(commentSeq);
+
+		return jdbcTemplate.query(query.toString(), args.toArray(), new BeanPropertyRowMapper<SubComment>(SubComment.class));
+	}
+
+	public int selectCount(int postSeq, int commentSeq) {
+		StringBuilder query = new StringBuilder();
+		query.append("SELECT COUNT(*) ");
+		query.append("  FROM TBL_BOARD_POST_COMMENT ");
+		query.append("WHERE POST_SEQ = ? ");
+		query.append("AND SEQ = ? ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(postSeq);
+		args.add(commentSeq);
+
+		return jdbcTemplate.queryForObject(query.toString(), args.toArray(), Integer.class);
+	}
+
+	public int selectSubCommentCount(int postSeq, int commentSeq) {
+		StringBuilder query = new StringBuilder();
+		query.append("SELECT COUNT(*) ");
+		query.append("  FROM TBL_BOARD_POST_COMMENT ");
+		query.append("WHERE POST_SEQ = ? ");
+		query.append("AND PARENT_COMMENT_SEQ = ? ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(postSeq);
+		args.add(commentSeq);
+
+		return jdbcTemplate.queryForObject(query.toString(), args.toArray(), Integer.class);
 	}
 
 }

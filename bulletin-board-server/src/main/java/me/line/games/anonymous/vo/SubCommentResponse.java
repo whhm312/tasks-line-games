@@ -1,18 +1,16 @@
 package me.line.games.anonymous.vo;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
 @Setter
 @Getter
-public class CommentResponse {
+public class SubCommentResponse {
 	private int seq;
 	private int postSeq;
+	private int parentCommentSeq;
 	private String nickName;
 	private String content;
 	private String deleteYn;
 	private String lastUpdateDate;
-	private List<SubCommentResponse> subComment;
 }

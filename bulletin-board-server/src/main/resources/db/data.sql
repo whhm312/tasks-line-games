@@ -1,6 +1,14 @@
-
--- INSERT INTO TBL_BOARD_POST (nick_name, user_id, title, content, hit, delete_yn, register_date) VALUES
---  ('Nick', 'test', 'title-', 'contents-', 0, 'N', sysdate);
+-- INSERT INTO TBL_BOARD_POST (seq, nick_name, user_id, title, content, hit, delete_yn, register_date) VALUES
+-- (NEXTVAL('SEQ_BOARD_POST'), 'Nick', 'test', 'title-', 'contents-', 0, 'N', sysdate);
+-- 
+-- INSERT INTO TBL_BOARD_POST (seq, nick_name, user_id, title, content, hit, delete_yn, register_date) VALUES
+-- (NEXTVAL('SEQ_BOARD_POST'), 'Ben', 'ccccc', 'abcdefg', 'zzzzdddddd', 0, 'N', sysdate);
+-- 
+-- INSERT INTO TBL_BOARD_POST_COMMENT (seq, parent_comment_seq, post_seq, nick_name, user_id, content, delete_yn, register_date) VALUES
+-- (NEXTVAL('SEQ_BOARD_POST_COMMENT'), 0, CURRVAL('SEQ_BOARD_POST'), 'Nana', 'tttt', '코멘트 달아요.', 'N', sysdate);
+-- 
+-- INSERT INTO TBL_BOARD_POST_COMMENT (seq, parent_comment_seq, post_seq, nick_name, user_id, content, delete_yn, register_date) VALUES
+-- (NEXTVAL('SEQ_BOARD_POST_COMMENT'), 0, CURRVAL('SEQ_BOARD_POST'), 'Nana', 'tttt', '코멘트 하나 더 달아요.', 'N', sysdate);
 
 -- SAMPLE
 INSERT INTO TBL_USER (first_name, last_name, email) VALUES

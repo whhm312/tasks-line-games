@@ -15,11 +15,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import me.line.games.anonymous.service.AnonymousMapperService;
 import me.line.games.anonymous.service.AnonymousPostService;
+import me.line.games.anonymous.vo.CommentsResponse;
+import me.line.games.anonymous.vo.CreatedCommonResponse;
+import me.line.games.anonymous.vo.ModifyCommentRequest;
 import me.line.games.anonymous.vo.ModifyPostRequest;
+import me.line.games.anonymous.vo.NewCommentRequest;
 import me.line.games.anonymous.vo.NewPostRequest;
-import me.line.games.anonymous.vo.NewPostResponse;
 import me.line.games.anonymous.vo.PostDetailResponse;
 import me.line.games.anonymous.vo.PostsResponse;
+import me.line.games.common.domain.Comment;
+import me.line.games.common.domain.CommonComment;
 import me.line.games.common.domain.Post;
 import me.line.games.common.domain.PostDetail;
 import me.line.games.common.vo.CommonResponse;
@@ -37,23 +42,20 @@ public class AnonymousPostController {
 	}
 
 	@PostMapping("/posts")
-	public ResponseEntity<NewPostResponse> save(@RequestBody NewPostRequest request) {
+	public ResponseEntity<CreatedCommonResponse> save(@RequestBody NewPostRequest request) {
 		Post post = anonymousMapper.newRequestToPost(request);
 		// TODO Login id 셋팅하기
 		post.setUserId(userId);
 
 		int seq = anonymousService.save(post);
 
-		NewPostResponse body = new NewPostResponse();
-		body.setSuccess();
-		body.setSeq(seq);
-
-		return new ResponseEntity<NewPostResponse>(body, HttpStatus.CREATED);
+		CreatedCommonResponse body = new CreatedCommonResponse(seq);
+		return new ResponseEntity<CreatedCommonResponse>(body, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/posts")
-	public ResponseEntity<PostsResponse> getPosts(@RequestParam String searchType, @RequestParam String searchText,
-			@RequestParam(defaultValue = "1") int page, @RequestParam(defaultValue = "10") int row) {
+	public ResponseEntity<PostsResponse> getPosts(@RequestParam String searchType, @RequestParam String searchText, @RequestParam(defaultValue = "1") int page,
+			@RequestParam(defaultValue = "10") int row) {
 
 		SearchCondition condition = new SearchCondition(searchType, searchText, page, row);
 
@@ -65,8 +67,8 @@ public class AnonymousPostController {
 	}
 
 	@GetMapping("/posts/{id}")
-	public ResponseEntity<PostDetailResponse> getPost(@PathVariable String id) {
-		PostDetail post = anonymousService.find(id);
+	public ResponseEntity<PostDetailResponse> getPost(@PathVariable(name = "id") int postSeq) {
+		PostDetail post = anonymousService.find(postSeq);
 
 		PostDetailResponse response = anonymousMapper.postDetailToResponse(post);
 		return new ResponseEntity<PostDetailResponse>(response, HttpStatus.OK);
@@ -87,9 +89,70 @@ public class AnonymousPostController {
 	}
 
 	@DeleteMapping("/posts/{id}")
-	public ResponseEntity<CommonResponse> delete(@PathVariable String id) {
+	public ResponseEntity<CommonResponse> delete(@PathVariable(name = "id") int postSeq) {
 		// TODO Login id 셋팅하기
-		anonymousService.delete(userId, id);
+		anonymousService.delete(userId, postSeq);
+
+		CommonResponse body = new CommonResponse();
+		body.setSuccess();
+		return new ResponseEntity<CommonResponse>(body, HttpStatus.OK);
+	}
+
+	@PostMapping("/posts/{id}/comments")
+	public ResponseEntity<CreatedCommonResponse> saveComment(@PathVariable(name = "id") int postSeq, @RequestBody NewCommentRequest request) {
+		CommonComment comment = anonymousMapper.newRequestToComment(request);
+		// TODO Login id 셋팅하기
+		comment.setUserId(userId);
+		comment.setPostSeq(postSeq);
+
+		int seq = anonymousService.save(comment);
+
+		CreatedCommonResponse body = new CreatedCommonResponse(seq);
+		return new ResponseEntity<CreatedCommonResponse>(body, HttpStatus.CREATED);
+	}
+
+	@PostMapping("/posts/{id}/comments/{commentId}")
+	public ResponseEntity<CreatedCommonResponse> saveSubComment(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
+			@RequestBody NewCommentRequest request) {
+		CommonComment comment = anonymousMapper.newRequestToComment(request);
+		// TODO Login id 셋팅하기
+		comment.setUserId(userId);
+		comment.setPostSeq(postSeq);
+		comment.setSeq(commentSeq);
+
+		int seq = anonymousService.save(comment);
+
+		CreatedCommonResponse body = new CreatedCommonResponse(seq);
+		return new ResponseEntity<CreatedCommonResponse>(body, HttpStatus.CREATED);
+	}
+
+	@GetMapping("/posts/{id}/comments/{commentId}")
+	public ResponseEntity<CommentsResponse> getComments(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq) {
+		Comment comments = anonymousService.getComments(postSeq, commentSeq);
+		int totalCount = anonymousService.getCommentsCount(postSeq, commentSeq);
+		CommentsResponse body = anonymousMapper.commentsToResponse(comments, totalCount);
+		return new ResponseEntity<CommentsResponse>(body, HttpStatus.OK);
+	}
+
+	@PutMapping("/posts/{id}/comments/{commentId}")
+	public ResponseEntity<CommonResponse> modify(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
+			@RequestBody ModifyCommentRequest request) {
+		Comment comment = anonymousMapper.modifyRequestToComment(request);
+		// TODO Login id 셋팅하기
+		comment.setUserId(userId);
+		comment.setPostSeq(postSeq);
+		comment.setSeq(commentSeq);
+
+		anonymousService.modify(comment);
+
+		CommonResponse body = new CommonResponse();
+		body.setSuccess();
+		return new ResponseEntity<CommonResponse>(body, HttpStatus.OK);
+	}
+
+	@DeleteMapping("/posts/{id}/comments/{commentId}")
+	public ResponseEntity<CommonResponse> delete(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq) {
+		anonymousService.delete(userId, postSeq, commentSeq);
 
 		CommonResponse body = new CommonResponse();
 		body.setSuccess();

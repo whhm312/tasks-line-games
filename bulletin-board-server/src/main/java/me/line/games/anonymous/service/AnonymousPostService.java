@@ -5,8 +5,11 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import me.line.games.anonymous.dao.AnonymousPostDAO;
+import me.line.games.common.domain.Comment;
+import me.line.games.common.domain.CommonComment;
 import me.line.games.common.domain.Post;
 import me.line.games.common.domain.PostDetail;
+import me.line.games.common.domain.SubComment;
 import me.line.games.common.vo.SearchCondition;
 
 @Service
@@ -29,18 +32,44 @@ public class AnonymousPostService {
 		return anonymousPostDAO.selectAllCount(condition);
 	}
 
-	public PostDetail find(String postId) {
-		anonymousPostDAO.updateHit(postId);
-		return anonymousPostDAO.select(postId);
+	public PostDetail find(int postSeq) {
+		anonymousPostDAO.updateHit(postSeq);
+		return anonymousPostDAO.select(postSeq);
 	}
 
 	public void modify(Post post) {
 		anonymousPostDAO.update(post);
 	}
 
-	public void delete(String userId, String postId) {
-		anonymousPostDAO.deletePost(userId, postId);
-		anonymousPostDAO.deleteComments(userId, postId);
+	public void delete(String userId, int postSeq) {
+		anonymousPostDAO.deletePost(userId, postSeq);
+		anonymousPostDAO.deleteComments(userId, postSeq);
+	}
+
+	public int save(CommonComment comment) {
+		anonymousPostDAO.isExistPost(comment.getPostSeq());
+		return anonymousPostDAO.insert(comment);
+	}
+
+	public void modify(Comment comment) {
+		anonymousPostDAO.update(comment);
+	}
+
+	public void delete(String userId, int postSeq, int commentSeq) {
+		anonymousPostDAO.deleteComment(userId, postSeq, commentSeq);
+	}
+
+	public Comment getComments(int postSeq, int commentSeq) {
+		Comment comment = anonymousPostDAO.selectComment(postSeq, commentSeq);
+		List<SubComment> subComments = anonymousPostDAO.selectSubComments(postSeq, commentSeq);
+		comment.setSubComments(subComments);
+		return comment;
+	}
+
+	public int getCommentsCount(int postSeq, int commentSeq) {
+		int selectCommentCount = anonymousPostDAO.selectCount(postSeq, commentSeq);
+		int selectSubCommentCount = anonymousPostDAO.selectSubCommentCount(postSeq, commentSeq);
+		return selectCommentCount + selectSubCommentCount;
 	}
 
 }

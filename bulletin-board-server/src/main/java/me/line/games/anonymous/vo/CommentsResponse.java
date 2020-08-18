@@ -5,6 +5,7 @@ import lombok.Setter;
 
 @Setter
 @Getter
-public class ModifyCommentRequest {
-	private String content;
+public class CommentsResponse {
+	private int totalCount;
+	private CommentResponse comment;
 }
