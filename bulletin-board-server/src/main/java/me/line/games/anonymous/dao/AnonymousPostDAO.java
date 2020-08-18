@@ -68,7 +68,6 @@ public class AnonymousPostDAO {
 
 		query.append("    SELECT POST_SEQ, COUNT(*) AS COMM_CNT ");
 		query.append("      FROM TBL_BOARD_POST_COMMENT ");
-		query.append("     WHERE DELETE_YN = 'N' ");
 		query.append("     GROUP BY POST_SEQ ");
 
 		query.append(") AS C ON P.SEQ = C.POST_SEQ ");
