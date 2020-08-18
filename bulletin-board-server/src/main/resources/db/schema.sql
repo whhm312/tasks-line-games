@@ -18,8 +18,8 @@ CREATE TABLE TBL_BOARD_POST_COMMENT (
   user_id VARCHAR(50) NOT NULL,
   content CLOB NOT NULL,
   delete_yn CHAR(1) NOT NULL,
-  register_date DATE NOT NULL,
-  last_update_date DATE NULL
+  register_date TIMESTAMP NOT NULL,
+  last_update_date TIMESTAMP NULL
 );
 
 -- SEQUENCES --------------------------------------------
