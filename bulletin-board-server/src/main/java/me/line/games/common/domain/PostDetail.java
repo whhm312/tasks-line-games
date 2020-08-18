@@ -19,4 +19,5 @@ public class PostDetail {
 	private Date registerDate;
 	private Date lastUpdateDate;
 	private List<Comment> comments;
+	private int commentCount;
 }

@@ -16,4 +16,5 @@ public class PostDetailResponse {
 	private String registerDate;
 	private String lastUpdateDate;
 	private List<CommentResponse> comments;
+	private int commentCount;
 }

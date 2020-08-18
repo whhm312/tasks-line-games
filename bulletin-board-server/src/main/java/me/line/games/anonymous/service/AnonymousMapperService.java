@@ -1,5 +1,6 @@
 package me.line.games.anonymous.service;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import me.line.games.anonymous.vo.ModifyCommentRequest;
 import me.line.games.anonymous.vo.ModifyPostRequest;
 import me.line.games.anonymous.vo.NewCommentRequest;
 import me.line.games.anonymous.vo.NewPostRequest;
+import me.line.games.anonymous.vo.PostCommentsResponse;
 import me.line.games.anonymous.vo.PostDetailResponse;
 import me.line.games.anonymous.vo.PostResponse;
 import me.line.games.anonymous.vo.PostsResponse;
@@ -54,22 +56,85 @@ public interface AnonymousMapperService {
 
 	default CommentsResponse commentsToResponse(Comment comment, int totalCount) {
 		CommentsResponse result = new CommentsResponse();
-
-		List<SubCommentResponse> subCommentsResponse = new ArrayList<>();
-		for (SubComment subComment : comment.getSubComments()) {
-			subCommentsResponse.add(subCommentToResponse(subComment));
-		}
-
-		CommentResponse commentResponse = commentToResponse(comment);
-		commentResponse.setSubComment(subCommentsResponse);
-
-		result.setComment(commentResponse);
+		result.setComment(commentToResponse(comment));
 		result.setTotalCount(totalCount);
 		return result;
 	}
 
-	CommentResponse commentToResponse(Comment comment);
+	default CommentResponse commentToResponse(Comment comment) {
+		CommentResponse result = new CommentResponse();
+		result.setRegisterDate("");
+		result.setLastUpdateDate("");
+		if ("N".equals(comment.getDeleteYn())) {
+			result.setContent(comment.getContent());
+			result.setDeleteYn(comment.getDeleteYn());
+			result.setNickName(comment.getNickName());
+			result.setPostSeq(comment.getPostSeq());
+			result.setSeq(comment.getSeq());
 
-	SubCommentResponse subCommentToResponse(SubComment comment);
+			if (comment.getRegisterDate() != null) {
+				result.setRegisterDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getRegisterDate()));
+			}
+
+			if (comment.getLastUpdateDate() != null) {
+				result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
+			}
+		} else {
+			result.setContent("");
+			result.setDeleteYn(comment.getDeleteYn());
+			result.setNickName("");
+			result.setPostSeq(0);
+			result.setSeq(0);
+		}
+
+		List<SubCommentResponse> subComments = new ArrayList<>();
+		if (comment.getSubComments() != null) {
+			for (SubComment subComment : comment.getSubComments()) {
+				subComments.add(subCommentToResponse(subComment));
+			}
+		}
+		result.setSubComments(subComments);
+
+		return result;
+	}
+
+	default SubCommentResponse subCommentToResponse(SubComment comment) {
+		SubCommentResponse result = new SubCommentResponse();
+		result.setRegisterDate("");
+		result.setLastUpdateDate("");
+
+		if ("N".equals(comment.getDeleteYn())) {
+			result.setContent(comment.getContent());
+			result.setDeleteYn(comment.getDeleteYn());
+			result.setNickName(comment.getNickName());
+			result.setPostSeq(comment.getPostSeq());
+			result.setSeq(comment.getSeq());
+
+			if (comment.getRegisterDate() != null) {
+				result.setRegisterDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getRegisterDate()));
+			}
+			if (comment.getLastUpdateDate() != null) {
+				result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
+			}
+		} else {
+			result.setContent("");
+			result.setDeleteYn(comment.getDeleteYn());
+			result.setNickName("");
+			result.setPostSeq(0);
+			result.setSeq(0);
+		}
+		return result;
+	}
+
+	default PostCommentsResponse postCommentsToResponse(List<Comment> comments, int totalCount) {
+		PostCommentsResponse result = new PostCommentsResponse();
+		List<CommentResponse> commentResponse = new ArrayList<>();
+		for (Comment comment : comments) {
+			commentResponse.add(commentToResponse(comment));
+		}
+		result.setComments(commentResponse);
+		result.setTotalCount(totalCount);
+		return result;
+	}
 
 }

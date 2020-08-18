@@ -59,14 +59,26 @@ public class AnonymousPostService {
 		anonymousPostDAO.deleteComment(userId, postSeq, commentSeq);
 	}
 
-	public Comment getComments(int postSeq, int commentSeq) {
+	public List<Comment> getComments(int postSeq) {
+		List<Comment> comments = anonymousPostDAO.selectComments(postSeq);
+		for (Comment comment : comments) {
+			comment.setSubComments(anonymousPostDAO.selectSubComments(postSeq, comment.getSeq()));
+		}
+		return comments;
+	}
+
+	public int getCommentsCount(int postSeq) {
+		return anonymousPostDAO.selectCommentCount(postSeq);
+	}
+
+	public Comment getComment(int postSeq, int commentSeq) {
 		Comment comment = anonymousPostDAO.selectComment(postSeq, commentSeq);
 		List<SubComment> subComments = anonymousPostDAO.selectSubComments(postSeq, commentSeq);
 		comment.setSubComments(subComments);
 		return comment;
 	}
 
-	public int getCommentsCount(int postSeq, int commentSeq) {
+	public int getCommentCount(int postSeq, int commentSeq) {
 		int selectCommentCount = anonymousPostDAO.selectCount(postSeq, commentSeq);
 		int selectSubCommentCount = anonymousPostDAO.selectSubCommentCount(postSeq, commentSeq);
 		return selectCommentCount + selectSubCommentCount;

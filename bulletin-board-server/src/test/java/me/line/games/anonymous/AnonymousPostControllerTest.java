@@ -234,7 +234,7 @@ public class AnonymousPostControllerTest {
 		assertEquals(mockComment.getContent(), cr.getContent());
 		assertEquals(mockComment.getSeq(), cr.getSeq());
 
-		List<SubCommentResponse> subComment = cr.getSubComment();
+		List<SubCommentResponse> subComment = cr.getSubComments();
 		for (SubCommentResponse subCommentResponse : subComment) {
 			assertEquals(nickName, subCommentResponse.getNickName());
 			assertEquals(content, subCommentResponse.getContent());

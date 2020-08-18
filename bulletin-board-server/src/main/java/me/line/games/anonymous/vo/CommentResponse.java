@@ -13,6 +13,7 @@ public class CommentResponse {
 	private String nickName;
 	private String content;
 	private String deleteYn;
+	private String registerDate;
 	private String lastUpdateDate;
-	private List<SubCommentResponse> subComment;
+	private List<SubCommentResponse> subComments;
 }

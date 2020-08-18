@@ -21,6 +21,7 @@ import me.line.games.anonymous.vo.ModifyCommentRequest;
 import me.line.games.anonymous.vo.ModifyPostRequest;
 import me.line.games.anonymous.vo.NewCommentRequest;
 import me.line.games.anonymous.vo.NewPostRequest;
+import me.line.games.anonymous.vo.PostCommentsResponse;
 import me.line.games.anonymous.vo.PostDetailResponse;
 import me.line.games.anonymous.vo.PostsResponse;
 import me.line.games.common.domain.Comment;
@@ -126,10 +127,19 @@ public class AnonymousPostController {
 		return new ResponseEntity<CreatedCommonResponse>(body, HttpStatus.CREATED);
 	}
 
+	@GetMapping("/posts/{id}/comments")
+	public ResponseEntity<PostCommentsResponse> getComments(@PathVariable(name = "id") int postSeq) {
+		List<Comment> comments = anonymousService.getComments(postSeq);
+		int totalCount = anonymousService.getCommentsCount(postSeq);
+
+		PostCommentsResponse body = anonymousMapper.postCommentsToResponse(comments, totalCount);
+		return new ResponseEntity<PostCommentsResponse>(body, HttpStatus.OK);
+	}
+
 	@GetMapping("/posts/{id}/comments/{commentId}")
-	public ResponseEntity<CommentsResponse> getComments(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq) {
-		Comment comments = anonymousService.getComments(postSeq, commentSeq);
-		int totalCount = anonymousService.getCommentsCount(postSeq, commentSeq);
+	public ResponseEntity<CommentsResponse> getComment(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq) {
+		Comment comments = anonymousService.getComment(postSeq, commentSeq);
+		int totalCount = anonymousService.getCommentCount(postSeq, commentSeq);
 		CommentsResponse body = anonymousMapper.commentsToResponse(comments, totalCount);
 		return new ResponseEntity<CommentsResponse>(body, HttpStatus.OK);
 	}

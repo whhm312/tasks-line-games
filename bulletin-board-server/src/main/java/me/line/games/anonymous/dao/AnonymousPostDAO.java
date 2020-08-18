@@ -77,13 +77,13 @@ public class AnonymousPostDAO {
 
 		List<Object> args = new ArrayList<>();
 		if (!StringUtils.isNullOrEmpty(condition.getSearchText())) {
-			args.add(condition.getSearchText());
+			args.add(like(condition.getSearchText()));
 
 			if ("TITLE+CONTENT".equals(condition.getSearchType())) {
-				query.append("AND (TITLE LIKE %?% OR CONTENT LIKE %?%) ");
-				args.add(condition.getSearchText());
+				query.append("AND (TITLE LIKE ? OR CONTENT LIKE ?) ");
+				args.add(like(condition.getSearchText()));
 			} else {
-				query.append("AND " + condition.getSearchType() + " LIKE %?% ");
+				query.append("AND " + condition.getSearchType() + " LIKE ? ");
 			}
 		}
 
@@ -93,12 +93,11 @@ public class AnonymousPostDAO {
 		args.add(condition.getStartNum());
 		args.add(condition.getEndNum());
 
-		List<Post> result = jdbcTemplate.query(query.toString(), args.toArray(), new BeanPropertyRowMapper<Post>(Post.class));
+		return jdbcTemplate.query(query.toString(), args.toArray(), new BeanPropertyRowMapper<Post>(Post.class));
+	}
 
-		if (result.size() < 1) {
-			throw new ResourceNoContentException("Search Contition is that " + condition.toString() + ".");
-		}
-		return result;
+	private String like(String searchText) {
+		return "%" + searchText + "%";
 	}
 
 	public int selectAllCount(SearchCondition condition) {
@@ -111,13 +110,13 @@ public class AnonymousPostDAO {
 
 		List<Object> args = new ArrayList<>();
 		if (!StringUtils.isNullOrEmpty(condition.getSearchText())) {
-			args.add(condition.getSearchText());
+			args.add(like(condition.getSearchText()));
 
 			if ("TITLE+CONTENT".equals(condition.getSearchType())) {
-				query.append("     AND (TITLE LIKE %?% OR CONTENT LIKE %?%) ");
-				args.add(condition.getSearchText());
+				query.append("     AND (TITLE LIKE ? OR CONTENT LIKE ?) ");
+				args.add(like(condition.getSearchText()));
 			} else {
-				query.append("     AND " + condition.getSearchType() + " LIKE %?% ");
+				query.append("     AND " + condition.getSearchType() + " LIKE ? ");
 			}
 		}
 
@@ -269,6 +268,19 @@ public class AnonymousPostDAO {
 		select(postSeq);
 	}
 
+	public List<Comment> selectComments(int postSeq) {
+		StringBuilder query = new StringBuilder();
+		query.append("SELECT *  ");
+		query.append("  FROM TBL_BOARD_POST_COMMENT ");
+		query.append(" WHERE POST_SEQ = ? ");
+		query.append("   AND PARENT_COMMENT_SEQ = 0 ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(postSeq);
+
+		return jdbcTemplate.query(query.toString(), args.toArray(), new BeanPropertyRowMapper<Comment>(Comment.class));
+	}
+
 	public Comment selectComment(int postSeq, int commentSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("SELECT *  ");
@@ -288,7 +300,11 @@ public class AnonymousPostDAO {
 	}
 
 	public List<SubComment> selectSubComments(int postSeq, int commentSeq) {
-		String query = "SELECT * FROM TBL_BOARD_POST_COMMENT WHERE POST_SEQ = ? AND PARENT_COMMENT_SEQ = ? ";
+		StringBuilder query = new StringBuilder();
+		query.append("SELECT * ");
+		query.append("FROM TBL_BOARD_POST_COMMENT ");
+		query.append("WHERE POST_SEQ = ? ");
+		query.append("AND PARENT_COMMENT_SEQ = ? ");
 
 		List<Object> args = new ArrayList<>();
 		args.add(postSeq);
@@ -321,6 +337,18 @@ public class AnonymousPostDAO {
 		List<Object> args = new ArrayList<>();
 		args.add(postSeq);
 		args.add(commentSeq);
+
+		return jdbcTemplate.queryForObject(query.toString(), args.toArray(), Integer.class);
+	}
+
+	public int selectCommentCount(int postSeq) {
+		StringBuilder query = new StringBuilder();
+		query.append("SELECT COUNT(*) ");
+		query.append("  FROM TBL_BOARD_POST_COMMENT ");
+		query.append("WHERE POST_SEQ = ? ");
+
+		List<Object> args = new ArrayList<>();
+		args.add(postSeq);
 
 		return jdbcTemplate.queryForObject(query.toString(), args.toArray(), Integer.class);
 	}
