@@ -109,6 +109,7 @@ public interface AnonymousMapperService {
 
 		result.setSeq(comment.getSeq());
 		result.setPostSeq(comment.getPostSeq());
+		result.setParentCommentSeq(comment.getParentCommentSeq());
 		result.setNickName(comment.getNickName());
 		result.setContent(comment.getContent());
 		result.setDeleteYn(comment.getDeleteYn());

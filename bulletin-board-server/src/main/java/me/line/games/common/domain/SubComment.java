@@ -6,4 +6,5 @@ import lombok.Setter;
 @Setter
 @Getter
 public class SubComment extends CommonComment {
+	private int parentCommentSeq;
 }
