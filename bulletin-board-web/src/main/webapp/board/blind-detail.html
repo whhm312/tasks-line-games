@@ -263,7 +263,7 @@
   	function responseComment(data, status) {
   		$("#commentsTd").empty();
   		$("#commentCountTd").text("댓글 [" + data.totalCount + "] ");
-  		$("#commentCountTd").append("<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentcommentseq=\"0\">댓글</button>");
+  		$("#commentCountTd").append("<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentcommentseq=\"0\">댓글</button> <hr><hr>");
   		
   		$.each(data.comments, function(idx, value) {
   			$("#commentsTd").append(gridComment(value));
@@ -281,18 +281,15 @@
   		});
   		
   		$("[id=btnAddSubComment]").click(function() {
-  			$selector = $(this);
   	  		$("#newCommentDiv").remove();
+  	  		$("#modifyCommentDiv").remove();
   	  		
-  			console.log("btnAddSubComment.click : ", $selector);
-  	  		console.log("parent comment seq : ", $selector.attr("parentCommentSeq"));
+  			$selector = $(this);
   	  		$selector.parents(".panel").append(gridNewComment($selector.attr("parentCommentSeq")));
   	  		
   	  		$("#btnSaveSubComment").click(function() {
-  	  			console.log("btnSaveSubComment.click : ", $selector);
   	  			saveSubComment($selector);
   	  		});
-			//openNewComment($(this));
   		});
   		
   		$("[id=btnDeleteComment]").click(function() {
@@ -312,27 +309,27 @@
   			});
   			
   		});
+  		
   		$("[id=btnModifyComment]").click(function() {
-  			alert("수정");
+  	  		$("#newCommentDiv").remove();
+  	  		$("#modifyCommentDiv").remove();
+  	  		
+  	  		$selector = $(this);
+  	  		$selector.parents(".panel").append(girdModifyComment());
+  	  		$("#modifyComment").text($selector.parents(".panel-default").find(".panel-body > p").text());
+  	  	
+ 			$("#btnModifySaveComment").click(function() {
+  				saveModifyComment($selector.attr("commentSeq"));
+ 			});
   		});
   		
-  	}
-  	
-  	function openNewComment(selector) {
-  		$("#newCommentDiv").remove();
-  		
-  		$(selector).parents(".panel").append(gridNewComment($(selector).attr("parentCommentSeq")));
-  		
-  		$("#btnSaveSubComment").click(function() {
-  			saveSubComment($(selector));
-  		});
   	}
   	
   	function gridComment(value) {
-  		var html = "<hr>";
+  		var html = "";
   			
 		if (value.deleteYn === "N") {
-	  		html += "<div class=\"panel panel-info\" style=\"margin-top: 30px\">";
+	  		html += "<div class=\"panel panel-default\" style=\"margin-top: 30px\">";
 			html += "<div class=\"panel-heading form-row\">";
  			html += "<p class=\"col-md-8\">" + value.nickName + "</p>";
  			html += "<p class=\"col-md-2\">" + (value.lastUpdateDate ? value.lastUpdateDate : value.registerDate) + "</p>";
@@ -351,12 +348,12 @@
   			html += "<div class=\"panel-heading\"><p class=\"col-md-12\">삭제되었습니다.</p></div>";
 			html += "</div>";
 		}
-		
+		html += "<hr>";
 		return html;
   	}
-  	
+
   	function gridSubComment(subValue) {
-		var html = "<hr>";
+		var html = "";
 		if (subValue.deleteYn === "N") {
 			html += "<div class=\"panel panel-default\" style=\"margin-top: 30px;margin-left: 30px\">";
   			html += "<div class=\"panel-heading form-row\">";
@@ -375,10 +372,11 @@
   			html += "</div>";
 			html += "</div>";
 		} else {
-			html += "<div class=\"panel panel-default\">";
+			html += "<div class=\"panel panel-default\" style=\"margin-left: 20px\">";
   			html += "<div class=\"panel-heading\"><p class=\"col-md-12\">▷삭제되었습니다.</p></div>";
 			html += "</div>";
 		}
+		html += "<hr style=\"margin-left: 20px;\">";
 		return html;
   	}
   	
@@ -398,6 +396,24 @@
 		} else {
 			html += "<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnSaveSubComment\">대댓글쓰기</button>";
 		}
+  		html += "</div>";
+  		html += "</div>";
+  		html += "</div>";
+  		return html;
+  	}
+  	
+  	function girdModifyComment() {
+  		var html = "";
+  		html += "<div class=\"panel panel-info\" style=\"margin-top: 30px\" id=\"modifyCommentDiv\">";
+  		html += "<div class=\"panel-heading form-row\">";
+  		html += "<p>익명</p>";
+  		html += "</div>";
+  		html += "<div class=\"panel-body form-row\">";
+  		html += "<div class=\"btn-group col-md-10\">";
+  		html += "<textarea rows=\"4\" class=\"form-control\" style=\"min-width: 100%\" id=\"modifyComment\"></textarea>";
+  		html += "</div>";
+  		html += "<div class=\"btn-group\">";
+		html += "<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnModifySaveComment\">수정</button>";
   		html += "</div>";
   		html += "</div>";
   		html += "</div>";
@@ -433,7 +449,32 @@
   		}, function() {
   			load();
   		});
-  	}	
+  	}
+
+  	
+  	function saveModifyComment(commentSeq) {
+  		var param = {
+  			"content" : $("#modifyComment").val()
+  		};
+  		
+  		var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments/" + commentSeq;
+  		
+  		callPut(url, param, function(data, textStatus, jqXHR) {
+  	  		if (textStatus == 204) {
+  	  			alert("정보가 유효하지 않아 처리 하지 못했습니다.");
+  				return;
+  			}
+  	  		
+  			alert(data.message);
+  		}, function(jqXHR, textStatus) {
+  			if (jqXHR.status == 400) {
+				alert(jqXHR.responseText);
+				console.log(jqXHR.responseJSON);
+			}
+  		}, function() {
+  			load();
+  		});
+  	}  	
   </script>
 
 </body>
