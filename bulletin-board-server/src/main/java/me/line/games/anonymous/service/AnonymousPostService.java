@@ -3,6 +3,7 @@ package me.line.games.anonymous.service;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import me.line.games.anonymous.dao.AnonymousPostDAO;
 import me.line.games.common.domain.Comment;
@@ -40,7 +41,8 @@ public class AnonymousPostService {
 	public void modify(Post post) {
 		anonymousPostDAO.update(post);
 	}
-
+	
+	 @Transactional
 	public void delete(String userId, int postSeq) {
 		anonymousPostDAO.deletePost(userId, postSeq);
 		int count = anonymousPostDAO.selectCommentCount(postSeq);
