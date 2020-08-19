@@ -118,7 +118,6 @@ public class AnonymousPostControllerTest {
 		assertEquals(mockPost.getNickName(), response.getBody().getNickName());
 		assertEquals(mockPost.getTitle(), response.getBody().getTitle());
 		assertEquals(mockPost.getContent(), response.getBody().getContent());
-		assertTrue(null == response.getBody().getComments());
 		assertEquals(1, response.getBody().getHit());
 
 		assertTrue(validationDate(response.getBody().getRegisterDate()));

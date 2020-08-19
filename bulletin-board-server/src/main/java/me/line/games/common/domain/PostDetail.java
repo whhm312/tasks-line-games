@@ -1,7 +1,6 @@
 package me.line.games.common.domain;
 
 import java.util.Date;
-import java.util.List;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -18,6 +17,4 @@ public class PostDetail {
 	private String deleteYn;
 	private Date registerDate;
 	private Date lastUpdateDate;
-	private List<Comment> comments;
-	private int commentCount;
 }

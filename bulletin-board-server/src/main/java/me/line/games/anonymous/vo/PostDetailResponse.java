@@ -1,7 +1,5 @@
 package me.line.games.anonymous.vo;
 
-import java.util.List;
-
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,6 +13,4 @@ public class PostDetailResponse {
 	private int hit;
 	private String registerDate;
 	private String lastUpdateDate;
-	private List<CommentResponse> comments;
-	private int commentCount;
 }
