@@ -441,13 +441,13 @@
   			$("#newCommentDiv").remove();
   			
   			alert(data.message);
+  			load();
   		}, function(jqXHR, textStatus) {
   			if (jqXHR.status == 400) {
 				alert(jqXHR.responseText);
 				console.log(jqXHR.responseJSON);
 			}
   		}, function() {
-  			load();
   		});
   	}
 
@@ -466,13 +466,14 @@
   			}
   	  		
   			alert(data.message);
+  			load();
   		}, function(jqXHR, textStatus) {
   			if (jqXHR.status == 400) {
 				alert(jqXHR.responseText);
 				console.log(jqXHR.responseJSON);
 			}
   		}, function() {
-  			load();
+  			
   		});
   	}  	
   </script>
