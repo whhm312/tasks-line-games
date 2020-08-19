@@ -1,5 +1,6 @@
 package me.line.games.common.exception;
 
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -19,9 +20,11 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(ResourceNoContentException.class)
 	protected ResponseEntity<CommonResponse> handleResourceNoContentException(ResourceNoContentException e) {
-		final CommonResponse response = new CommonResponse();
-		response.setCode("E0002");
-		response.setMessage(e.getMessage());
-		return new ResponseEntity<>(response, HttpStatus.NO_CONTENT);
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@ExceptionHandler(EmptyResultDataAccessException.class)
+	protected ResponseEntity<CommonResponse> handleEmptyResultDataAccessException(EmptyResultDataAccessException e) {
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 	}
 }
