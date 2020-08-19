@@ -61,17 +61,16 @@ public class AnonymousPostDAO {
 		query.append("SELECT * ");
 		query.append("FROM ( ");
 
-		query.append("SELECT ROWNUM() AS RNUM, *, ");
-		query.append("  IFNULL(COMM_CNT, 0) AS COMMENT_COUNT ");
-
-		query.append("FROM TBL_BOARD_POST AS P LEFT JOIN ( ");
-
-		query.append("    SELECT POST_SEQ, COUNT(*) AS COMM_CNT ");
-		query.append("      FROM TBL_BOARD_POST_COMMENT ");
-		query.append("     GROUP BY POST_SEQ ");
-
-		query.append(") AS C ON P.SEQ = C.POST_SEQ ");
-
+		query.append("SELECT ROWNUM() AS RNUM, ");
+		query.append("  SEQ, ");
+		query.append("  NICK_NAME, ");
+		query.append("  USER_ID, ");
+		query.append("  TITLE, ");
+		query.append("  HIT, ");
+		query.append("  DELETE_YN, ");
+		query.append("  REGISTER_DATE, ");
+		query.append("  LAST_UPDATE_DATE ");
+		query.append("FROM TBL_BOARD_POST ");
 		query.append("WHERE P.DELETE_YN = 'N' ");
 
 		List<Object> args = new ArrayList<>();
@@ -86,7 +85,14 @@ public class AnonymousPostDAO {
 			}
 		}
 
-		query.append(") ");
+		query.append(") AS P ");
+		
+		query.append("LEFT JOIN ( ");
+		query.append("    SELECT POST_SEQ, COUNT(*) AS COMMENT_COUNT ");
+		query.append("      FROM TBL_BOARD_POST_COMMENT ");
+		query.append("     GROUP BY POST_SEQ ");
+		query.append(") AS C ON P.SEQ = C.POST_SEQ ");
+		
 		query.append("WHERE RNUM >= ? AND RNUM <= ? ");
 
 		args.add(condition.getStartNum());
