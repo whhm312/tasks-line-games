@@ -8,6 +8,10 @@ function callPost(url, data, successCallback, errorCallback, completeCallback) {
 	callAjax(url, "POST", data, successCallback, errorCallback, completeCallback);
 }
 
+function callPut(url, data, successCallback, errorCallback, completeCallback) {
+	callAjax(url, "PUT", data, successCallback, errorCallback, completeCallback);
+}
+
 function callDelete(url, successCallback, errorCallback, completeCallback) {
 	callAjax(url, "DELETE", "", successCallback, errorCallback, completeCallback);
 }

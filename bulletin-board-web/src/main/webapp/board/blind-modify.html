@@ -108,38 +108,20 @@
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header text-right">
-            	<div class="btn-group">
-	            	<button type="button" class="btn btn-default btn-sm" id="btnGoList">목록</button>
-	            	<button type="button" class="btn btn-default btn-sm" id="btnGoModify">수정</button>
+            	<div class="form-group">
+	            	<button type="button" class="btn btn-outline-primary" id="btnGoList">목록</button>
+	            	<button type="button" class="btn btn-outline-primary" id="btnSave">저장</button>
             	</div>
             </div>
             <div class="card-body">
-              <div class="table-responsive">
-				<table class="table">
-				  <tbody>
-				  	<tr>
-				  		<td colspan="2"><h4 id="titleH4">제목</h4></td>
-				  	</tr>
-				  	<tr>
-				  		<td id="nickNameTd" style="border-top:0;padding-bottom: 0">작성자</td>
-				  		<td id="hitTd" class="text-right" style="border-top:0;padding-bottom: 0">조회수</td>
-				  	</tr>
-				  	<tr>
-				  		<td id="registerDateTd" colspan="2" class="text-left" style="font-size: 12px;border-top:0;padding-top: 0">작성일시</td>
-				  	</tr>
-				  	<tr>
-				  		<td id="contentTd" colspan="2" style="border-top:0">내용</td>
-				  	</tr>
-				  	<tr>
-				  		<td id="commentCountTd" colspan="2" style="font-size: 14px;border-top:0;padding-bottom: 0">댓글 (1)</td>
-				  	</tr>
-				  	<tr>
-				  		<td id="commentsTd" colspan="2" style="border-top:0;padding-top: 0">
-				  		</td>
-				  	</tr>
-				  </tbody>
-				</table>
-              </div>
+				<form id="boardForm">
+				  <div class="form-group">
+				    <input type="text" class="form-control" id="title" name="title" maxlength="500">
+				  </div>
+				  <div class="form-group">
+				    <textarea class="form-control" name="content" rows="10" maxlength="2000"></textarea>
+				  </div>
+				</form>
             </div>
           </div>
 
@@ -204,12 +186,10 @@
   	$(document).ready(function(){
   		load();
   		
-  		$("#btnGoList").click(function() {
-  			location.href = "/board/blind.html";
-  		});
+  		$("#btnGoList").click(goList);
   		
-  		$("#btnGoModify").click(function() {
-  			location.href = "/board/blind-modify.html";
+  		$("#btnSave").click(function() {
+  			save();
   		});
   		
   	}); // end of document.ready
@@ -220,71 +200,44 @@
   	}
   	
   	function responsePost(data, status) {
-  		$("#titleH4").text(data.title);
-  		$("#nickNameTd").text(data.nickName);
-  		$("#hitTd").html("<i class=\"fa fa-eye\" aria-hidden=\"true\"></i> " + data.hit);
-  		$("#registerDateTd").text(data.registerDate);
-  		$("#contentTd").text(data.content);
-
-  		var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments";
-  		callGet(url, responseComment);
-  	}
-  	
-  	function responseComment(data, status) {
-  		$("#commentCountTd").text("댓글 [" + data.totalCount + "]");
+  		if (status == 204) {
+			alert("데이터가 존재하지 않습니다.");
+  			history.back();
+			return;
+		}
   		
-  		var commentHtml = "";
-  		$.each(data.comments, function(idx, value) {
-  			commentHtml = "<hr>";
-	  		commentHtml += "<div class=\"panel panel-info\" style=\"margin-top: 30px\">";
-	  			
-  			if (value.deleteYn === "N") {
-	  			commentHtml += "<div class=\"panel-heading form-row\">";
-  	  			commentHtml += "<p class=\"col-md-9\">" + value.nickName + "</p>";
-  	  			commentHtml += "<p class=\"col-md-2\">" + (value.lastUpdateDate ? value.lastUpdateDate : value.registerDate) + "</p>";
-  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button></p>";
-  	  			commentHtml += "</div>";
-  	  			commentHtml += "<div class=\"panel-body\">";
-  	  			commentHtml += "<p class=\"col-md-12\">" + value.content + "</p>";
-  	  			commentHtml += "</div>";
-			} else {
-	  			commentHtml += "<div class=\"panel-heading form-row\"><p class=\"col-md-12\">삭제되었습니다.</p></div>";
-			}
-  			commentHtml += "</div>";
-  			$("#commentsTd").append(commentHtml);
-  			
-			$.each(value.subComments, function(subIdx, subValue) {
-	  			commentHtml = "<hr>";
-				commentHtml += "<div class=\"panel panel-default\" style=\"margin-top: 30px;margin-left: 30px\">";
-	  			if (subValue.deleteYn === "N") {
-		  			commentHtml += "<div class=\"panel-heading form-row\">";
-	  	  			commentHtml += "<p class=\"col-md-9\">▷" + subValue.nickName + "</p>";
-	  	  			commentHtml += "<p class=\"col-md-2\">" + (subValue.lastUpdateDate ? subValue.lastUpdateDate : subValue.registerDate) + "</p>";
-	  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentCommentSeq=\"" + subValue.seq + "\">대댓글</button></p>";
-	  	  			commentHtml += "</div>";
-	  	  			commentHtml += "<div class=\"panel-body\">";
-	  	  			commentHtml += "<p class=\"col-md-12\">" + subValue.content + "</p>";
-	  	  			commentHtml += "</div>";
-				} else {
-		  			commentHtml += "<div class=\"panel-heading form-row\"><p class=\"col-md-12\">▷삭제되었습니다.</p></div>";
-				}
-	  			$("#commentsTd").append(commentHtml);
-			});
-  			
-  		});
+  		$("#title").val(data.title);
+  		$("[name=content]").text(data.content);
   	}
   	
-  	function moveList(seq) {
+  	function goList() {
   		location.href = "/board/blind.html";
   	}
-  	
-  	function moveEdit(seq) {
-  		location.href = "/board/blind-edit.html";
-  	}
-  	
-  	function addComment(seq) {
-  		location.href = "/board/blind-edit.html";
-  	}
+
+  	function save() {
+  		var param = {
+  			"title" : $("#title").val(),
+  			"content" : $("[name=content]").val()
+  		};
+  		
+  		var url = SERVER_URL + "/posts/" + getUrlParam("id");
+  		
+  		callPut(url, param, function(data, textStatus, jqXHR) {
+  	  		if (textStatus == 204) {
+  	  			alert("정보가 유효하지 않아 처리 하지 못했습니다.");
+  				return;
+  			}
+  	  		
+  			alert(data.message);
+  			goList();
+  		}, function(jqXHR, textStatus) {
+  			if (jqXHR.status == 400) {
+				alert(jqXHR.responseText);
+				console.log(jqXHR.responseJSON);
+			}
+  		}, function() {
+  		});
+  	}	
   </script>
 
 </body>

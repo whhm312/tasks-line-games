@@ -78,11 +78,11 @@ public class AnonymousPostController {
 	}
 
 	@PutMapping("/posts/{id}")
-	public ResponseEntity<CommonResponse> modify(@PathVariable String id, @RequestBody ModifyPostRequest request) {
+	public ResponseEntity<CommonResponse> modify(@PathVariable(name = "id") int postSeq, @Valid @RequestBody ModifyPostRequest request) {
 		Post post = anonymousMapper.modifyRequestToPost(request);
 		// TODO Login id 셋팅하기
 		post.setUserId(userId);
-		post.setSeq(Integer.parseInt(id));
+		post.setSeq(postSeq);
 
 		anonymousService.modify(post);
 
