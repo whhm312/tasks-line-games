@@ -1,6 +1,5 @@
 package me.line.games.anonymous.vo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
@@ -26,6 +25,5 @@ public class CommentResponse {
 		this.deleteYn = "Y";
 		this.registerDate = "";
 		this.lastUpdateDate = "";
-		this.subComments = new ArrayList<>();
 	}
 }

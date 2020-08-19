@@ -251,52 +251,26 @@
   		$("#registerDateTd").text(data.registerDate);
   		$("#contentTd").text(data.content);
 
+
+  		loadComments();
+  	}
+  	
+  	function loadComments() {
   		var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments";
   		callGet(url, responseComment);
   	}
   	
   	function responseComment(data, status) {
+  		$("#commentsTd").empty();
   		$("#commentCountTd").text("댓글 [" + data.totalCount + "] ");
   		$("#commentCountTd").append("<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentcommentseq=\"0\">댓글</button>");
   		
-  		var commentHtml = "";
   		$.each(data.comments, function(idx, value) {
-  			commentHtml = "<hr>";
-	  		commentHtml += "<div class=\"panel panel-info\" style=\"margin-top: 30px\">";
-	  			
-  			if (value.deleteYn === "N") {
-	  			commentHtml += "<div class=\"panel-heading form-row\">";
-  	  			commentHtml += "<p class=\"col-md-9\">" + value.nickName + "</p>";
-  	  			commentHtml += "<p class=\"col-md-2\">" + (value.lastUpdateDate ? value.lastUpdateDate : value.registerDate) + "</p>";
-  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddSubComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button></p>";
-  	  			commentHtml += "</div>";
-  	  			commentHtml += "<div class=\"panel-body\">";
-  	  			commentHtml += "<p class=\"col-md-12\">" + value.content + "</p>";
-  	  			commentHtml += "</div>";
-			} else {
-	  			commentHtml += "<div class=\"panel-heading form-row\"><p class=\"col-md-12\">삭제되었습니다.</p></div>";
-			}
-  			commentHtml += "</div>";
-  			$("#commentsTd").append(commentHtml);
+  			$("#commentsTd").append(gridComment(value));
   			
 			$.each(value.subComments, function(subIdx, subValue) {
-	  			commentHtml = "<hr>";
-				commentHtml += "<div class=\"panel panel-default\" style=\"margin-top: 30px;margin-left: 30px\">";
-	  			if (subValue.deleteYn === "N") {
-		  			commentHtml += "<div class=\"panel-heading form-row\">";
-	  	  			commentHtml += "<p class=\"col-md-9\">▷" + subValue.nickName + "</p>";
-	  	  			commentHtml += "<p class=\"col-md-2\">" + (subValue.lastUpdateDate ? subValue.lastUpdateDate : subValue.registerDate) + "</p>";
-	  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddSubComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button></p>";
-	  	  			commentHtml += "</div>";
-	  	  			commentHtml += "<div class=\"panel-body\">";
-	  	  			commentHtml += "<p class=\"col-md-12\">" + subValue.content + "</p>";
-	  	  			commentHtml += "</div>";
-				} else {
-		  			commentHtml += "<div class=\"panel-heading form-row\"><p class=\"col-md-12\">▷삭제되었습니다.</p></div>";
-				}
-	  			$("#commentsTd").append(commentHtml);
+	  			$("#commentsTd").append(gridSubComment(value, subValue));
 			});
-  			
   		});
   		
   		$("#btnAddComment").click(function() {
@@ -309,6 +283,28 @@
   		$("[id=btnAddSubComment]").click(function() {
 			openNewComment($(this));
   		});
+  		
+  		$("[id=btnDeleteComment]").click(function() {
+  			var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments/" + $(this).attr("commentSeq");
+  			
+  			callDelete(url, function(data, textStatus, jqXHR){
+  				if (textStatus == 204) {
+  					alert("정보가 유효하지 않아 처리 하지 못했습니다.");
+					return;
+				}
+  				
+  				alert(data.message);
+  			}, function(jqXHR, textStatus){
+            
+  			}, function(){
+  				loadComments();
+  			});
+  			
+  		});
+  		$("[id=btnModifyComment]").click(function() {
+  			alert("수정");
+  		});
+  		
   	}
   	
   	function openNewComment(selector) {
@@ -319,6 +315,55 @@
   		$("#btnSaveSubComment").click(function() {
   			saveSubComment($(selector));
   		});
+  	}
+  	
+  	function gridComment(value) {
+  		var html = "<hr>";
+  		html += "<div class=\"panel panel-info\" style=\"margin-top: 30px\">";
+  			
+		if (value.deleteYn === "N") {
+			html += "<div class=\"panel-heading form-row\">";
+ 			html += "<p class=\"col-md-8\">" + value.nickName + "</p>";
+ 			html += "<p class=\"col-md-2\">" + (value.lastUpdateDate ? value.lastUpdateDate : value.registerDate) + "</p>";
+ 			html += "<div class=\"form-group\">";
+ 			html += "<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"btnAddSubComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button> ";
+ 			html += "<button type=\"button\" class=\"btn btn-outline-info btn-sm\" id=\"btnModifyComment\" commentSeq=\"" + value.seq + "\">수정</button> ";
+ 			html += "<button type=\"button\" class=\"btn btn-outline-info btn-sm\" id=\"btnDeleteComment\" commentSeq=\"" + value.seq + "\">삭제</button>";
+ 			html += "</div>";
+ 			html += "</div>";
+ 			html += "<div class=\"panel-body\">";
+ 			html += "<p class=\"col-md-12\">" + value.content + "</p>";
+ 			html += "</div>";
+		} else {
+  			html += "<div class=\"panel-heading form-row\"><p class=\"col-md-12\">삭제되었습니다.</p></div>";
+		}
+		
+		html += "</div>";
+		return html;
+  	}
+  	
+  	function gridSubComment(value, subValue) {
+		var html = "<hr>";
+		html += "<div class=\"panel panel-default\" style=\"margin-top: 30px;margin-left: 30px\">";
+		if (subValue.deleteYn === "N") {
+  			html += "<div class=\"panel-heading form-row\">";
+  			html += "<p class=\"col-md-8\">▷" + subValue.nickName + "</p>";
+  			html += "<p class=\"col-md-2\">" + (subValue.lastUpdateDate ? subValue.lastUpdateDate : subValue.registerDate) + "</p>";
+  			
+  			html += "<div class=\"form-group\">";
+  			html += "<button type=\"button\" class=\"btn btn-info btn-sm\" id=\"btnAddSubComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button> ";
+  			html += "<button type=\"button\" class=\"btn btn-outline-info btn-sm\" id=\"btnModifyComment\" commentSeq=\"" + subValue.seq + "\">수정</button> ";
+  			html += "<button type=\"button\" class=\"btn btn-outline-info btn-sm\" id=\"btnDeleteComment\" commentSeq=\"" + subValue.seq + "\">삭제</button>";
+  			html += "</div>";
+  			
+  			html += "</div>";
+  			html += "<div class=\"panel-body\">";
+  			html += "<p class=\"col-md-12\">" + subValue.content + "</p>";
+  			html += "</div>";
+		} else {
+  			html += "<div class=\"panel-heading form-row\"><p class=\"col-md-12\">▷삭제되었습니다.</p></div>";
+		}
+		return html;
   	}
   	
   	function gridNewComment(parentCommentSeq) {

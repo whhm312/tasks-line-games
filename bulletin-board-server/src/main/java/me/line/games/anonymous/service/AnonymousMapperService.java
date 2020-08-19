@@ -67,6 +67,15 @@ public interface AnonymousMapperService {
 
 	default CommentResponse commentToResponse(Comment comment) {
 		CommentResponse result = new CommentResponse();
+
+		List<SubCommentResponse> subComments = new ArrayList<>();
+		if (comment.getSubComments() != null) {
+			for (SubComment subComment : comment.getSubComments()) {
+				subComments.add(subCommentToResponse(subComment));
+			}
+		}
+		result.setSubComments(subComments);
+		
 		if ("Y".equals(comment.getDeleteYn())) {
 			result.deleted();
 			return result;
@@ -87,14 +96,6 @@ public interface AnonymousMapperService {
 		if (comment.getLastUpdateDate() != null) {
 			result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
 		}
-
-		List<SubCommentResponse> subComments = new ArrayList<>();
-		if (comment.getSubComments() != null) {
-			for (SubComment subComment : comment.getSubComments()) {
-				subComments.add(subCommentToResponse(subComment));
-			}
-		}
-		result.setSubComments(subComments);
 
 		return result;
 	}
