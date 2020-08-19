@@ -108,10 +108,10 @@
           <!-- DataTales Example -->
           <div class="card shadow mb-4">
             <div class="card-header text-right">
-            	<div class="btn-group">
-	            	<button type="button" class="btn btn-default btn-sm" id="btnGoList">목록</button>
-	            	<button type="button" class="btn btn-default btn-sm" id="btnGoModify">수정</button>
-	            	<button type="button" class="btn btn-default btn-sm" id="btnGoDelete">삭제</button>
+            	<div class="form-group">
+	            	<button type="button" class="btn btn-outline-primary" id="btnGoList">목록</button>
+	            	<button type="button" class="btn btn-outline-primary" id="btnGoModify">수정</button>
+	            	<button type="button" class="btn btn-outline-primary" id="btnGoDelete">삭제</button>
             	</div>
             </div>
             <div class="card-body">
@@ -295,18 +295,6 @@
   		$("[id=btnAddSubComment]").click(function() {
 			openNewComment($(this));
   		});
-  	}
-  	
-  	function moveList(seq) {
-  		location.href = "/board/blind.html";
-  	}
-  	
-  	function moveEdit(seq) {
-  		location.href = "/board/blind-edit.html";
-  	}
-  	
-  	function addComment(seq) {
-  		location.href = "/board/blind-edit.html";
   	}
   	
   	function openNewComment(selector) {
