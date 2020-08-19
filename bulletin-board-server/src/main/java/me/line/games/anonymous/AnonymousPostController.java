@@ -2,6 +2,8 @@ package me.line.games.anonymous;
 
 import java.util.List;
 
+import javax.validation.Valid;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -43,7 +45,7 @@ public class AnonymousPostController {
 	}
 
 	@PostMapping("/posts")
-	public ResponseEntity<CreatedCommonResponse> save(@RequestBody NewPostRequest request) {
+	public ResponseEntity<CreatedCommonResponse> save(@Valid @RequestBody NewPostRequest request) {
 		Post post = anonymousMapper.newRequestToPost(request);
 		// TODO Login id 셋팅하기
 		post.setUserId(userId);

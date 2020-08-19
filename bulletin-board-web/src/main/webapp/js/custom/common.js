@@ -12,6 +12,7 @@ function callAjax(url, type, data, successCallback, errorCallback, completeCallb
 	var param = "";
 	if (data) {
 		param = JSON.stringify(data);
+		console.log("Param : ", param);
 	}
 	
   	$.ajax({
