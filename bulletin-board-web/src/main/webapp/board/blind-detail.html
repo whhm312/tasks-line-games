@@ -225,6 +225,12 @@
   	}
   	
   	function responsePost(data, status) {
+  		if (status == 204) {
+			alert("데이터가 존재하지 않습니다.");
+  			location.href = "/board/blind.html";
+			return;
+		}
+  		
   		$("#titleH4").text(data.title);
   		$("#nickNameTd").text(data.nickName);
   		$("#hitTd").html("<i class=\"fa fa-eye\" aria-hidden=\"true\"></i> " + data.hit);

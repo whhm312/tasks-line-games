@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.h2.util.StringUtils;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -14,8 +13,6 @@ import me.line.games.common.domain.CommonComment;
 import me.line.games.common.domain.Post;
 import me.line.games.common.domain.PostDetail;
 import me.line.games.common.domain.SubComment;
-import me.line.games.common.exception.FailedCreateContentException;
-import me.line.games.common.exception.ResourceNoContentException;
 import me.line.games.common.vo.SearchCondition;
 
 @Repository
@@ -46,13 +43,11 @@ public class AnonymousPostDAO {
 		args.add(post.getTitle());
 		args.add(post.getContent());
 
-		int result = jdbcTemplate.update(query.toString(), args.toArray());
-		if (result < 1) {
-			throw new FailedCreateContentException("Failed to INSERT a Post that " + post.toString() + ".");
-		}
+		jdbcTemplate.update(query.toString(), args.toArray());
 
 		query.setLength(0);
 		query.append("SELECT CURRVAL('SEQ_BOARD_POST')");
+
 		return jdbcTemplate.queryForObject(query.toString(), Integer.class);
 	}
 
@@ -86,13 +81,13 @@ public class AnonymousPostDAO {
 		}
 
 		query.append(") AS P ");
-		
+
 		query.append("LEFT JOIN ( ");
 		query.append("    SELECT POST_SEQ, COUNT(*) AS CNT ");
 		query.append("      FROM TBL_BOARD_POST_COMMENT ");
 		query.append("     GROUP BY POST_SEQ ");
 		query.append(") AS C ON P.SEQ = C.POST_SEQ ");
-		
+
 		query.append("WHERE RNUM >= ? AND RNUM <= ? ");
 
 		args.add(condition.getStartNum());
@@ -132,6 +127,7 @@ public class AnonymousPostDAO {
 
 	public PostDetail select(int postSeq) {
 		String query = "SELECT * FROM TBL_BOARD_POST WHERE SEQ = ? AND DELETE_YN = 'N' ";
+
 		return jdbcTemplate.queryForObject(query, new Object[] { postSeq }, new BeanPropertyRowMapper<PostDetail>(PostDetail.class));
 	}
 
@@ -141,10 +137,8 @@ public class AnonymousPostDAO {
 		query.append("SET HIT = HIT + 1 ");
 		query.append("WHERE SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { postSeq });
-		if (result == 0) {
-			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot UPDATE hit of the Post.");
-		}
+
+		jdbcTemplate.update(query.toString(), new Object[] { postSeq });
 	}
 
 	public void update(Post post) {
@@ -163,10 +157,7 @@ public class AnonymousPostDAO {
 		args.add(post.getUserId());
 		args.add(post.getSeq());
 
-		int result = jdbcTemplate.update(query.toString(), args.toArray());
-		if (result == 0) {
-			throw new ResourceNoContentException("The Post SEQ is " + post.getSeq() + ". Cannot UPDATE the Post.");
-		}
+		jdbcTemplate.update(query.toString(), args.toArray());
 	}
 
 	public void deletePost(String userId, int postSeq) {
@@ -177,10 +168,8 @@ public class AnonymousPostDAO {
 		query.append("WHERE USER_ID = ? ");
 		query.append("  AND SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
-		if (result == 0) {
-			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot DELETE the Post.");
-		}
+
+		jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
 	}
 
 	public void deleteComments(String userId, int postSeq) {
@@ -191,10 +180,8 @@ public class AnonymousPostDAO {
 		query.append("WHERE USER_ID = ? ");
 		query.append("  AND POST_SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
-		if (result == 0) {
-			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot DELETE the Comments in the Post.");
-		}
+
+		jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
 	}
 
 	public int insert(CommonComment comment) {
@@ -217,13 +204,11 @@ public class AnonymousPostDAO {
 		args.add(comment.getUserId());
 		args.add(comment.getContent());
 
-		int result = jdbcTemplate.update(query.toString(), args.toArray());
-		if (result == 0) {
-			throw new FailedCreateContentException("Failed to INSERT a Comment that " + comment.toString() + ".");
-		}
+		jdbcTemplate.update(query.toString(), args.toArray());
 
 		query.setLength(0);
 		query.append("SELECT CURRVAL('SEQ_BOARD_POST_COMMENT')");
+
 		return jdbcTemplate.queryForObject(query.toString(), Integer.class);
 	}
 
@@ -242,10 +227,8 @@ public class AnonymousPostDAO {
 		args.add(comment.getSeq());
 		args.add(comment.getPostSeq());
 		args.add(comment.getUserId());
-		int result = jdbcTemplate.update(query.toString(), args.toArray());
-		if (result == 0) {
-			throw new ResourceNoContentException("The Comment SEQ is " + comment.getSeq() + ". Cannot UPDATE the Comment.");
-		}
+
+		jdbcTemplate.update(query.toString(), args.toArray());
 	}
 
 	public void deleteComment(String userId, int postSeq, int commentSeq) {
@@ -257,11 +240,8 @@ public class AnonymousPostDAO {
 		query.append("  AND POST_SEQ = ? ");
 		query.append("  AND SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
-		int result = jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq, commentSeq });
-		if (result == 0) {
-			throw new ResourceNoContentException(
-					"The Post SEQ is " + postSeq + " and Comment SEQ is " + commentSeq + ". Cannot DELETE the Comment in the Post.");
-		}
+
+		jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq, commentSeq });
 	}
 
 	public void isExistPost(int postSeq) {
@@ -292,11 +272,7 @@ public class AnonymousPostDAO {
 		args.add(postSeq);
 		args.add(commentSeq);
 
-		try {
-			return jdbcTemplate.queryForObject(query.toString(), args.toArray(), new BeanPropertyRowMapper<Comment>(Comment.class));
-		} catch (EmptyResultDataAccessException e) {
-			throw new ResourceNoContentException("The Post SEQ is " + postSeq + " and Comment SEQ is " + commentSeq + ".");
-		}
+		return jdbcTemplate.queryForObject(query.toString(), args.toArray(), new BeanPropertyRowMapper<Comment>(Comment.class));
 	}
 
 	public List<SubComment> selectSubComments(int postSeq, int commentSeq) {

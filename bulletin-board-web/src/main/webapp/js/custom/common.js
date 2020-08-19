@@ -24,19 +24,19 @@ function callAjax(url, type, data, successCallback, errorCallback, completeCallb
   			$("#loadingDiv").fadeIn("slow");
   		},
   		success: function(data, textStatus, jqXHR) {
-  			console.log("success : ", data);
+  			console.log("success status[", jqXHR.status,"], data : ", data);
   			
   			if ( typeof successCallback === "function" ) {
-  				successCallback(data, textStatus, jqXHR);
+  				successCallback(data, jqXHR.status, jqXHR);
   			}
   		},
   		error: function(jqXHR, textStatus, errorThrown) {
-  			console.log("error jqXHR : ", jqXHR);
+  			console.log("error (", jqXHR.status, ") jqXHR : ", jqXHR);
   			console.log("error textStatus : ", textStatus);
   			console.log("error errorThrown : ", errorThrown);
   			
   			if ( typeof errorCallback === "function" ) {
-  				errorCallback(jqXHR, textStatus, errorThrown);
+  				errorCallback(jqXHR, jqXHR.status, errorThrown);
   			}
   		},
   		complete : function(jqXHR, textStatus) {
