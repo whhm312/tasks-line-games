@@ -13,4 +13,14 @@ public class SubCommentResponse {
 	private String deleteYn;
 	private String lastUpdateDate;
 	private String registerDate;
+
+	public void deleted() {
+		this.seq = 0;
+		this.postSeq = 0;
+		this.nickName = "";
+		this.content = "";
+		this.deleteYn = "Y";
+		this.registerDate = "";
+		this.lastUpdateDate = "";
+	}
 }

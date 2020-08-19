@@ -41,11 +41,15 @@ public interface AnonymousMapperService {
 		return result;
 	}
 
-	@Mappings({ @Mapping(target = "registerDate", source = "post.registerDate", dateFormat = "yyyy-MM-dd HH:mm") })
+	@Mappings({ 
+		@Mapping(target = "registerDate", source = "post.registerDate", dateFormat = "yyyy-MM-dd HH:mm", defaultValue = "") 
+	})
 	PostResponse postToResponse(Post post);
 
-	@Mappings({ @Mapping(target = "registerDate", source = "post.registerDate", dateFormat = "yyyy-MM-dd HH:mm"),
-			@Mapping(target = "lastUpdateDate", source = "post.lastUpdateDate", dateFormat = "yyyy-MM-dd HH:mm") })
+	@Mappings({ 
+		@Mapping(target = "registerDate", source = "post.registerDate", dateFormat = "yyyy-MM-dd HH:mm", defaultValue = ""),
+		@Mapping(target = "lastUpdateDate", source = "post.lastUpdateDate", dateFormat = "yyyy-MM-dd HH:mm", defaultValue = "")
+	})
 	PostDetailResponse postDetailToResponse(PostDetail post);
 
 	Post modifyRequestToPost(ModifyPostRequest request);
@@ -63,28 +67,25 @@ public interface AnonymousMapperService {
 
 	default CommentResponse commentToResponse(Comment comment) {
 		CommentResponse result = new CommentResponse();
+		if ("Y".equals(comment.getDeleteYn())) {
+			result.deleted();
+			return result;
+		}
+
+		result.setSeq(comment.getSeq());
+		result.setPostSeq(comment.getPostSeq());
+		result.setNickName(comment.getNickName());
+		result.setContent(comment.getContent());
+		result.setDeleteYn(comment.getDeleteYn());
 		result.setRegisterDate("");
 		result.setLastUpdateDate("");
-		if ("N".equals(comment.getDeleteYn())) {
-			result.setContent(comment.getContent());
-			result.setDeleteYn(comment.getDeleteYn());
-			result.setNickName(comment.getNickName());
-			result.setPostSeq(comment.getPostSeq());
-			result.setSeq(comment.getSeq());
 
-			if (comment.getRegisterDate() != null) {
-				result.setRegisterDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getRegisterDate()));
-			}
+		if (comment.getRegisterDate() != null) {
+			result.setRegisterDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getRegisterDate()));
+		}
 
-			if (comment.getLastUpdateDate() != null) {
-				result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
-			}
-		} else {
-			result.setContent("");
-			result.setDeleteYn(comment.getDeleteYn());
-			result.setNickName("");
-			result.setPostSeq(0);
-			result.setSeq(0);
+		if (comment.getLastUpdateDate() != null) {
+			result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
 		}
 
 		List<SubCommentResponse> subComments = new ArrayList<>();
@@ -100,29 +101,26 @@ public interface AnonymousMapperService {
 
 	default SubCommentResponse subCommentToResponse(SubComment comment) {
 		SubCommentResponse result = new SubCommentResponse();
+		if ("Y".equals(comment.getDeleteYn())) {
+			result.deleted();
+			return result;
+		}
+
+		result.setSeq(comment.getSeq());
+		result.setPostSeq(comment.getPostSeq());
+		result.setNickName(comment.getNickName());
+		result.setContent(comment.getContent());
+		result.setDeleteYn(comment.getDeleteYn());
 		result.setRegisterDate("");
 		result.setLastUpdateDate("");
 
-		if ("N".equals(comment.getDeleteYn())) {
-			result.setContent(comment.getContent());
-			result.setDeleteYn(comment.getDeleteYn());
-			result.setNickName(comment.getNickName());
-			result.setPostSeq(comment.getPostSeq());
-			result.setSeq(comment.getSeq());
-
-			if (comment.getRegisterDate() != null) {
-				result.setRegisterDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getRegisterDate()));
-			}
-			if (comment.getLastUpdateDate() != null) {
-				result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
-			}
-		} else {
-			result.setContent("");
-			result.setDeleteYn(comment.getDeleteYn());
-			result.setNickName("");
-			result.setPostSeq(0);
-			result.setSeq(0);
+		if (comment.getRegisterDate() != null) {
+			result.setRegisterDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getRegisterDate()));
 		}
+		if (comment.getLastUpdateDate() != null) {
+			result.setLastUpdateDate(new SimpleDateFormat("yyyy-MM-dd HH:mm").format(comment.getLastUpdateDate()));
+		}
+
 		return result;
 	}
 
