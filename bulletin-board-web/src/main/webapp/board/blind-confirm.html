@@ -111,7 +111,6 @@
             	<div class="btn-group">
 	            	<button type="button" class="btn btn-default btn-sm" id="btnGoList">목록</button>
 	            	<button type="button" class="btn btn-default btn-sm" id="btnGoModify">수정</button>
-	            	<button type="button" class="btn btn-default btn-sm" id="btnGoDelete">삭제</button>
             	</div>
             </div>
             <div class="card-body">
@@ -132,7 +131,7 @@
 				  		<td id="contentTd" colspan="2" style="border-top:0">내용</td>
 				  	</tr>
 				  	<tr>
-				  		<td id="commentCountTd" colspan="2" style="font-size: 14px;border-top:0;padding-bottom: 0">댓글 (0)</td>
+				  		<td id="commentCountTd" colspan="2" style="font-size: 14px;border-top:0;padding-bottom: 0">댓글 (1)</td>
 				  	</tr>
 				  	<tr>
 				  		<td id="commentsTd" colspan="2" style="border-top:0;padding-top: 0">
@@ -210,11 +209,7 @@
   		});
   		
   		$("#btnGoModify").click(function() {
-  			location.href = "/board/blind-confirm.html";
-  		});
-  		
-  		$("#btnGoDelete").click(function() {
-  			location.href = "/board/blind-confirm.html";
+  			location.href = "/board/blind-modify.html";
   		});
   		
   	}); // end of document.ready
@@ -236,8 +231,7 @@
   	}
   	
   	function responseComment(data, status) {
-  		$("#commentCountTd").text("댓글 [" + data.totalCount + "] ");
-  		$("#commentCountTd").append("<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentcommentseq=\"0\">댓글</button>");
+  		$("#commentCountTd").text("댓글 [" + data.totalCount + "]");
   		
   		var commentHtml = "";
   		$.each(data.comments, function(idx, value) {
@@ -248,7 +242,7 @@
 	  			commentHtml += "<div class=\"panel-heading form-row\">";
   	  			commentHtml += "<p class=\"col-md-9\">" + value.nickName + "</p>";
   	  			commentHtml += "<p class=\"col-md-2\">" + (value.lastUpdateDate ? value.lastUpdateDate : value.registerDate) + "</p>";
-  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddSubComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button></p>";
+  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button></p>";
   	  			commentHtml += "</div>";
   	  			commentHtml += "<div class=\"panel-body\">";
   	  			commentHtml += "<p class=\"col-md-12\">" + value.content + "</p>";
@@ -266,7 +260,7 @@
 		  			commentHtml += "<div class=\"panel-heading form-row\">";
 	  	  			commentHtml += "<p class=\"col-md-9\">▷" + subValue.nickName + "</p>";
 	  	  			commentHtml += "<p class=\"col-md-2\">" + (subValue.lastUpdateDate ? subValue.lastUpdateDate : subValue.registerDate) + "</p>";
-	  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddSubComment\" parentCommentSeq=\"" + value.seq + "\">대댓글</button></p>";
+	  	  			commentHtml += "<p class=\"col-md-1\"><button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnAddComment\" parentCommentSeq=\"" + subValue.seq + "\">대댓글</button></p>";
 	  	  			commentHtml += "</div>";
 	  	  			commentHtml += "<div class=\"panel-body\">";
 	  	  			commentHtml += "<p class=\"col-md-12\">" + subValue.content + "</p>";
@@ -277,17 +271,6 @@
 	  			$("#commentsTd").append(commentHtml);
 			});
   			
-  		});
-  		
-  		$("#btnAddComment").click(function() {
-			$("#newCommentDiv").remove();
-			$("#commentsTd").append(gridNewComment($(this).attr("parentCommentSeq")));
-
-	  		$("#btnSaveComment").click(saveComment);
-  		});
-  		
-  		$("[id=btnAddSubComment]").click(function() {
-			openNewComment($(this));
   		});
   	}
   	
@@ -302,63 +285,6 @@
   	function addComment(seq) {
   		location.href = "/board/blind-edit.html";
   	}
-  	
-  	function openNewComment(selector) {
-  		$("#newCommentDiv").remove();
-  		
-  		$(selector).parents(".panel").append(gridNewComment($(selector).attr("parentCommentSeq")));
-  		
-  		$("#btnSaveSubComment").click(saveSubComment);
-  	}
-  	
-  	function gridNewComment(parentCommentSeq) {
-  		var html = "";
-  		html += "<div class=\"panel panel-info\" style=\"margin-top: 30px\" id=\"newCommentDiv\">";
-  		html += "<div class=\"panel-heading form-row\">";
-  		html += "<p>익명</p>";
-  		html += "</div>";
-  		html += "<div class=\"panel-body form-row\">";
-  		html += "<div class=\"btn-group col-md-10\">";
-  		html += "<textarea rows=\"4\" class=\"form-control\" style=\"min-width: 100%\" id=\"newComment\"></textarea>";
-  		html += "</div>";
-  		html += "<div class=\"btn-group\">";
-  		if (parentCommentSeq == 0) {
-			html += "<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnSaveComment\">댓글쓰기</button>";
-		} else {
-			html += "<button type=\"button\" class=\"btn btn-primary btn-sm\" id=\"btnSaveSubComment\">대댓글쓰기</button>";
-		}
-  		html += "</div>";
-  		html += "</div>";
-  		html += "</div>";
-  		return html;
-  	}
-  	
-  	function saveComment() {
-  		var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments";
-  		save(url);
-  	}
-  	
-  	function saveSubComment() {
-  		var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments/" + $(selector).attr("parentCommentSeq");
-  		save(url);
-  	}
-
-  	function save(url) {
-  		var param = {
-  			"nickName" : "익명",
-  			"content" : $("#newComment").val()
-  		};
-  		
-  		callPost(url, param, function(data) {
-  			$("#commentsTd").empty();
-  			$("#newCommentDiv").remove();
-  			
-  			alert(data.message);
-  		}, function(jqXHR, textStatus) {
-  		}, function() {
-  			load();
-  		});
-  	}	
   </script>
 
 </body>

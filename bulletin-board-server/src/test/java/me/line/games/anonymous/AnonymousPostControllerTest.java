@@ -171,8 +171,6 @@ public class AnonymousPostControllerTest {
 		NewCommentRequest request = new NewCommentRequest();
 		request.setContent(mockComment.getContent());
 		request.setNickName(mockComment.getNickName());
-		request.setParentCommentSeq(0);
-		request.setPostSeq(mockPost.getSeq());
 
 		ResponseEntity<CreatedCommonResponse> saveResponse = template.postForEntity(base.toString(), request, CreatedCommonResponse.class);
 		CreatedCommonResponse saveResult = new CreatedCommonResponse(saveResponse.getBody().getSeq());
@@ -213,8 +211,6 @@ public class AnonymousPostControllerTest {
 		String nickName = "Maria";
 		request.setContent(content);
 		request.setNickName(nickName);
-		request.setParentCommentSeq(mockComment.getSeq());
-		request.setPostSeq(mockPost.getSeq());
 
 		ResponseEntity<CreatedCommonResponse> saveResponse = template.postForEntity(base.toString(), request, CreatedCommonResponse.class);
 		CreatedCommonResponse saveResult = new CreatedCommonResponse(saveResponse.getBody().getSeq());
