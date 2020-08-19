@@ -1,40 +1,53 @@
 const SERVER_URL = "http://localhost:9998";
 
-function callGet(url, callback) {
-	$("#loadingDiv").fadeIn("slow");
-	
-	console.log("Url : (GET) " + url);
-	$.get( url , function( data, status ) {
-		console.log("Data: ", data);
-		console.log("Status: ", status);
-		
-		callback(data, status);
-
-		$("#loadingDiv").fadeOut("fast");
-	});
+function callGet(url, successCallback, errorCallback, completeCallback) {
+	callAjax(url, "GET", "", successCallback, errorCallback, completeCallback);
 }
 
 function callPost(url, data, successCallback, errorCallback, completeCallback) {
-	$("#loadingDiv").fadeIn("slow");
+	callAjax(url, "POST", data, successCallback, errorCallback, completeCallback);
+}
+
+function callAjax(url, type, data, successCallback, errorCallback, completeCallback) {
+	var param = "";
+	if (data) {
+		param = JSON.stringify(data);
+	}
+	
   	$.ajax({
   		url: url,
-  		type: "POST",
+  		type: type,
   		dataType: "json",
   		contentType : "application/json; charset=utf-8",
-  		data: JSON.stringify(data),
-  		success: function(data) {
+  		data: param,
+  		beforeSend: function(jqXHR, settings) {
+  			$("#loadingDiv").fadeIn("slow");
+  		},
+  		success: function(data, textStatus, jqXHR) {
   			console.log("success : ", data);
-  			successCallback(data);
+  			
+  			if ( typeof successCallback === "function" ) {
+  				successCallback(data, textStatus, jqXHR);
+  			}
   		},
-  		error: function(jqXHR, textStatus) {
-  			console.log("error : ", jqXHR, textStatus);
-  			errorCallback(jqXHR, textStatus);
+  		error: function(jqXHR, textStatus, errorThrown) {
+  			console.log("error jqXHR : ", jqXHR);
+  			console.log("error textStatus : ", textStatus);
+  			console.log("error errorThrown : ", errorThrown);
+  			
+  			if ( typeof errorCallback === "function" ) {
+  				errorCallback(jqXHR, textStatus, errorThrown);
+  			}
   		},
-  		complete : function() {
+  		complete : function(jqXHR, textStatus) {
   			$("#loadingDiv").fadeOut("fast");
-  			completeCallback();
+  			
+  			if ( typeof completeCallback === "function" ) {
+  				completeCallback(jqXHR, textStatus);
+  			}
+  			
   		}
-	});
+	});	
 }
 
 function getUrlParam(name) {
