@@ -58,7 +58,7 @@ public class AnonymousPostDAO {
 
 	public List<Post> selectAll(SearchCondition condition) {
 		StringBuilder query = new StringBuilder();
-		query.append("SELECT * ");
+		query.append("SELECT *, IFNULL(CNT, 0) AS COMMENT_COUNT ");
 		query.append("FROM ( ");
 
 		query.append("SELECT ROWNUM() AS RNUM, ");
@@ -71,7 +71,7 @@ public class AnonymousPostDAO {
 		query.append("  REGISTER_DATE, ");
 		query.append("  LAST_UPDATE_DATE ");
 		query.append("FROM TBL_BOARD_POST ");
-		query.append("WHERE P.DELETE_YN = 'N' ");
+		query.append("WHERE DELETE_YN = 'N' ");
 
 		List<Object> args = new ArrayList<>();
 		if (!StringUtils.isNullOrEmpty(condition.getSearchText())) {
@@ -88,7 +88,7 @@ public class AnonymousPostDAO {
 		query.append(") AS P ");
 		
 		query.append("LEFT JOIN ( ");
-		query.append("    SELECT POST_SEQ, COUNT(*) AS COMMENT_COUNT ");
+		query.append("    SELECT POST_SEQ, COUNT(*) AS CNT ");
 		query.append("      FROM TBL_BOARD_POST_COMMENT ");
 		query.append("     GROUP BY POST_SEQ ");
 		query.append(") AS C ON P.SEQ = C.POST_SEQ ");
@@ -132,12 +132,7 @@ public class AnonymousPostDAO {
 
 	public PostDetail select(int postSeq) {
 		String query = "SELECT * FROM TBL_BOARD_POST WHERE SEQ = ? AND DELETE_YN = 'N' ";
-
-		try {
-			return jdbcTemplate.queryForObject(query, new Object[] { postSeq }, new BeanPropertyRowMapper<PostDetail>(PostDetail.class));
-		} catch (EmptyResultDataAccessException e) {
-			throw new ResourceNoContentException("The Post SEQ is " + postSeq + ". Cannot SELECT the Post.");
-		}
+		return jdbcTemplate.queryForObject(query, new Object[] { postSeq }, new BeanPropertyRowMapper<PostDetail>(PostDetail.class));
 	}
 
 	public void updateHit(int postSeq) {
