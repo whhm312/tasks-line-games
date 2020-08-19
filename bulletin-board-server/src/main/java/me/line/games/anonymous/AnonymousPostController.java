@@ -102,7 +102,7 @@ public class AnonymousPostController {
 	}
 
 	@PostMapping("/posts/{id}/comments")
-	public ResponseEntity<CreatedCommonResponse> saveComment(@PathVariable(name = "id") int postSeq, @RequestBody NewCommentRequest request) {
+	public ResponseEntity<CreatedCommonResponse> saveComment(@PathVariable(name = "id") int postSeq, @Valid @RequestBody NewCommentRequest request) {
 		CommonComment comment = anonymousMapper.newRequestToComment(request);
 		// TODO Login id 셋팅하기
 		comment.setUserId(userId);
@@ -116,7 +116,7 @@ public class AnonymousPostController {
 
 	@PostMapping("/posts/{id}/comments/{commentId}")
 	public ResponseEntity<CreatedCommonResponse> saveSubComment(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
-			@RequestBody NewCommentRequest request) {
+			@Valid @RequestBody NewCommentRequest request) {
 		CommonComment comment = anonymousMapper.newRequestToComment(request);
 		// TODO Login id 셋팅하기
 		comment.setUserId(userId);

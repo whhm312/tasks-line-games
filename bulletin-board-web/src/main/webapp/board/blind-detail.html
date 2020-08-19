@@ -302,7 +302,9 @@
   		
   		$(selector).parents(".panel").append(gridNewComment($(selector).attr("parentCommentSeq")));
   		
-  		$("#btnSaveSubComment").click(saveSubComment);
+  		$("#btnSaveSubComment").click(function() {
+  			saveSubComment($(selector));
+  		});
   	}
   	
   	function gridNewComment(parentCommentSeq) {
@@ -332,7 +334,7 @@
   		save(url);
   	}
   	
-  	function saveSubComment() {
+  	function saveSubComment(selector) {
   		var url = SERVER_URL + "/posts/" + getUrlParam("id") + "/comments/" + $(selector).attr("parentCommentSeq");
   		save(url);
   	}
@@ -349,6 +351,10 @@
   			
   			alert(data.message);
   		}, function(jqXHR, textStatus) {
+  			if (jqXHR.status == 400) {
+				alert(jqXHR.responseText);
+				console.log(jqXHR.responseJSON);
+			}
   		}, function() {
   			load();
   		});
