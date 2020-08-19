@@ -43,7 +43,10 @@ public class AnonymousPostService {
 
 	public void delete(String userId, int postSeq) {
 		anonymousPostDAO.deletePost(userId, postSeq);
-		anonymousPostDAO.deleteComments(userId, postSeq);
+		int count = anonymousPostDAO.selectCommentCount(postSeq);
+		if (count > 0) {
+			anonymousPostDAO.deleteComments(userId, postSeq);
+		}
 	}
 
 	public int save(CommonComment comment) {

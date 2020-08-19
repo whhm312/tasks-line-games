@@ -8,7 +8,13 @@ function callPost(url, data, successCallback, errorCallback, completeCallback) {
 	callAjax(url, "POST", data, successCallback, errorCallback, completeCallback);
 }
 
+function callDelete(url, successCallback, errorCallback, completeCallback) {
+	callAjax(url, "DELETE", "", successCallback, errorCallback, completeCallback);
+}
+
 function callAjax(url, type, data, successCallback, errorCallback, completeCallback) {
+	console.log("(" + type + ") url : ", url);
+	
 	var param = "";
 	if (data) {
 		param = JSON.stringify(data);
@@ -33,8 +39,7 @@ function callAjax(url, type, data, successCallback, errorCallback, completeCallb
   		},
   		error: function(jqXHR, textStatus, errorThrown) {
   			console.log("error (", jqXHR.status, ") jqXHR : ", jqXHR);
-  			console.log("error textStatus : ", textStatus);
-  			console.log("error errorThrown : ", errorThrown);
+			console.log(jqXHR.responseJSON);
   			
   			if ( typeof errorCallback === "function" ) {
   				errorCallback(jqXHR, jqXHR.status, errorThrown);

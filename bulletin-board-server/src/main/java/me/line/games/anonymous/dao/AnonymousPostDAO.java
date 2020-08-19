@@ -141,7 +141,7 @@ public class AnonymousPostDAO {
 		jdbcTemplate.update(query.toString(), new Object[] { postSeq });
 	}
 
-	public void update(Post post) {
+	public int update(Post post) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST ");
 		query.append("SET TITLE = ?, ");
@@ -157,10 +157,10 @@ public class AnonymousPostDAO {
 		args.add(post.getUserId());
 		args.add(post.getSeq());
 
-		jdbcTemplate.update(query.toString(), args.toArray());
+		return jdbcTemplate.update(query.toString(), args.toArray());
 	}
 
-	public void deletePost(String userId, int postSeq) {
+	public int deletePost(String userId, int postSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST ");
 		query.append("SET DELETE_YN = 'Y', ");
@@ -169,10 +169,10 @@ public class AnonymousPostDAO {
 		query.append("  AND SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
 
-		jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
+		return jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
 	}
 
-	public void deleteComments(String userId, int postSeq) {
+	public int deleteComments(String userId, int postSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST_COMMENT ");
 		query.append("SET DELETE_YN = 'Y', ");
@@ -181,7 +181,7 @@ public class AnonymousPostDAO {
 		query.append("  AND POST_SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
 
-		jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
+		return jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq });
 	}
 
 	public int insert(CommonComment comment) {
@@ -212,7 +212,7 @@ public class AnonymousPostDAO {
 		return jdbcTemplate.queryForObject(query.toString(), Integer.class);
 	}
 
-	public void update(Comment comment) {
+	public int update(Comment comment) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST_COMMENT ");
 		query.append("SET CONTENT = ?, ");
@@ -228,10 +228,10 @@ public class AnonymousPostDAO {
 		args.add(comment.getPostSeq());
 		args.add(comment.getUserId());
 
-		jdbcTemplate.update(query.toString(), args.toArray());
+		return jdbcTemplate.update(query.toString(), args.toArray());
 	}
 
-	public void deleteComment(String userId, int postSeq, int commentSeq) {
+	public int deleteComment(String userId, int postSeq, int commentSeq) {
 		StringBuilder query = new StringBuilder();
 		query.append("UPDATE TBL_BOARD_POST_COMMENT ");
 		query.append("SET DELETE_YN = 'Y', ");
@@ -241,7 +241,7 @@ public class AnonymousPostDAO {
 		query.append("  AND SEQ = ? ");
 		query.append("  AND DELETE_YN = 'N' ");
 
-		jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq, commentSeq });
+		return jdbcTemplate.update(query.toString(), new Object[] { userId, postSeq, commentSeq });
 	}
 
 	public void isExistPost(int postSeq) {

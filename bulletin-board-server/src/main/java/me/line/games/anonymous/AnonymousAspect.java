@@ -31,7 +31,7 @@ public class AnonymousAspect {
 	}
 
 	@AfterReturning(value = "execution(* me.line.games.anonymous.dao.AnonymousPostDAO.delete*(..))", returning = "returnValue")
-	public void afterDelete(JoinPoint joinPoint, Object returnValue) throws Throwable {
+	public void afterDelete(Object returnValue) throws Throwable {
 		if (returnValue instanceof Integer) {
 			if ((Integer) returnValue == 0) {
 				throw new ResourceNoContentException("Failed to DELETE.");

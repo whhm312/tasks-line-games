@@ -210,11 +210,25 @@
   		});
   		
   		$("#btnGoModify").click(function() {
-  			location.href = "/board/blind-confirm.html";
+  			location.href = "/board/blind-modify.html?id=" + getUrlParam("id");
   		});
   		
   		$("#btnGoDelete").click(function() {
-  			location.href = "/board/blind-confirm.html";
+  			var url = SERVER_URL + "/posts/" + getUrlParam("id");
+  			
+  			callDelete(url, function(data, textStatus, jqXHR){
+  				if (textStatus == 204) {
+  					alert("정보가 유효하지 않아 처리 하지 못했습니다.");
+					return;
+				}
+  				
+  				alert(data.message);
+  			}, function(jqXHR, textStatus){
+            
+  			}, function(){
+  				location.href = "/board/blind.html";
+  			});
+  			
   		});
   		
   	}); // end of document.ready
