@@ -24,7 +24,7 @@ public class SearchCondition {
 		if (page == 1) {
 			return page;
 		}
-		return (page - 1) + row;
+		return (page - 1) * row + 1;
 	}
 
 	public int getEndNum() {

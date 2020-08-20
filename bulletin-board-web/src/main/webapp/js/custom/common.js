@@ -1,4 +1,5 @@
 const SERVER_URL = "http://localhost:9998";
+const ROW = 10;
 
 function callGet(url, successCallback, errorCallback, completeCallback) {
 	callAjax(url, "GET", "", successCallback, errorCallback, completeCallback);
