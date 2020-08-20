@@ -148,7 +148,7 @@ public class AnonymousPostController {
 
 	@PutMapping("/posts/{id}/comments/{commentId}")
 	public ResponseEntity<CommonResponse> modify(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
-			@RequestBody ModifyCommentRequest request) {
+		@Valid	@RequestBody ModifyCommentRequest request) {
 		Comment comment = anonymousMapper.modifyRequestToComment(request);
 		// TODO Login id 셋팅하기
 		comment.setUserId(userId);
