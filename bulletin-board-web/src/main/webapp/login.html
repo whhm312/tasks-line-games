@@ -9,7 +9,7 @@
   <meta name="description" content="">
   <meta name="author" content="">
 
-  <title>SB Admin 2 - Login</title>
+  <title>익명게시판 로그인</title>
 
   <!-- Custom fonts for this template-->
   <link href="/vendor/fontawesome-free/css/all.min.css" rel="stylesheet" type="text/css">
@@ -17,6 +17,7 @@
 
   <!-- Custom styles for this template-->
   <link href="/css/sb-admin-2.min.css" rel="stylesheet">
+  <link href="/css/custom.css" rel="stylesheet">
 
 </head>
 
@@ -40,16 +41,10 @@
                   </div>
                   <form class="user">
                     <div class="form-group">
-                      <input type="text" class="form-control form-control-user" id="userId">
+                      <input type="text" class="form-control form-control-user" id="username">
                     </div>
                     <div class="form-group">
-                      <input type="password" class="form-control form-control-user" id="userPassword">
-                    </div>
-                    <div class="form-group">
-                      <div class="custom-control custom-checkbox small">
-                        <input type="checkbox" class="custom-control-input" id="customCheck">
-                        <label class="custom-control-label" for="customCheck">Remember Me</label>
-                      </div>
+                      <input type="password" class="form-control form-control-user" id="password">
                     </div>
                     <button type="button" class="btn btn-primary btn-user btn-block" id="btnLogin">Login</button>
                     <hr>
@@ -83,9 +78,39 @@
 
   <!-- Custom scripts for all pages-->
   <script src="/js/sb-admin-2.min.js"></script>
+  <script src="/js/custom/jquery.cookie.js"></script>
+  <script src="/js/custom/common.js"></script>
   <script type="text/javascript">
   	$(document).ready(function(){
   		$("#btnLogin").click(function() {
+  			var url = SERVER_URL + "/login";
+  		  	$.ajax({
+  		  		url: url,
+  		  		type: "POST",
+  		  		contentType : "application/json; charset=utf-8",
+  		  		data: JSON.stringify({
+  	    			"username" : $("#username").val(),
+  	    			"password" : $("#password").val()
+  	    		}),
+  		  		beforeSend: function(jqXHR, settings) {
+  		  			$("#loadingDiv").fadeIn("slow");
+  		  		},
+  		  		success: function(data, textStatus, jqXHR) {
+  		  			var auth = jqXHR.getResponseHeader('Authorization');
+  		  			if (auth) {
+  		  				$.cookie("auth", auth);
+  		  				window.location.replace("/board/blind.html");
+					}
+  		  		},
+  		  		error: function(jqXHR, textStatus, errorThrown) {
+  		  			if (jqXHR.status == 403) {
+						alert("로그인 정보를 다시 확인하세요.");
+					}
+  		  		},
+  		  		complete : function(jqXHR, textStatus) {
+  		  			$("#loadingDiv").fadeOut("fast");
+  		  		}
+  			});	
   		});
   		
   	}); // end of document.ready

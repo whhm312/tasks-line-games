@@ -1,4 +1,4 @@
-package me.line.games.sample.vo;
+package me.line.games.common.domain;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import lombok.Setter;
 @Getter
 public class User {
 	private int id;
-	private String first_name;
-	private String last_name;
+	private String user_id;
+	private String password;
 	private String email;
 }

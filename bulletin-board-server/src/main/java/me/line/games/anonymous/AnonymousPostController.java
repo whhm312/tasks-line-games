@@ -1,5 +1,6 @@
 package me.line.games.anonymous;
 
+import java.security.Principal;
 import java.util.List;
 
 import javax.validation.Valid;
@@ -37,7 +38,6 @@ import me.line.games.common.vo.SearchCondition;
 public class AnonymousPostController {
 	private AnonymousPostService anonymousService;
 	private AnonymousMapperService anonymousMapper;
-	private String userId = "test123";
 
 	public AnonymousPostController(AnonymousPostService anonymousService, AnonymousMapperService anonymousMapper) {
 		this.anonymousService = anonymousService;
@@ -45,10 +45,9 @@ public class AnonymousPostController {
 	}
 
 	@PostMapping("/posts")
-	public ResponseEntity<CreatedCommonResponse> save(@Valid @RequestBody NewPostRequest request) {
+	public ResponseEntity<CreatedCommonResponse> save(@Valid @RequestBody NewPostRequest request, Principal principal) {
 		Post post = anonymousMapper.newRequestToPost(request);
-		// TODO Login id 셋팅하기
-		post.setUserId(userId);
+		post.setUserId(principal.getName());
 
 		int seq = anonymousService.save(post);
 
@@ -78,10 +77,9 @@ public class AnonymousPostController {
 	}
 
 	@PutMapping("/posts/{id}")
-	public ResponseEntity<CommonResponse> modify(@PathVariable(name = "id") int postSeq, @Valid @RequestBody ModifyPostRequest request) {
+	public ResponseEntity<CommonResponse> modify(@PathVariable(name = "id") int postSeq, @Valid @RequestBody ModifyPostRequest request, Principal principal) {
 		Post post = anonymousMapper.modifyRequestToPost(request);
-		// TODO Login id 셋팅하기
-		post.setUserId(userId);
+		post.setUserId(principal.getName());
 		post.setSeq(postSeq);
 
 		anonymousService.modify(post);
@@ -92,9 +90,8 @@ public class AnonymousPostController {
 	}
 
 	@DeleteMapping("/posts/{id}")
-	public ResponseEntity<CommonResponse> delete(@PathVariable(name = "id") int postSeq) {
-		// TODO Login id 셋팅하기
-		anonymousService.delete(userId, postSeq);
+	public ResponseEntity<CommonResponse> delete(@PathVariable(name = "id") int postSeq, Principal principal) {
+		anonymousService.delete(principal.getName(), postSeq);
 
 		CommonResponse body = new CommonResponse();
 		body.setSuccess();
@@ -102,10 +99,10 @@ public class AnonymousPostController {
 	}
 
 	@PostMapping("/posts/{id}/comments")
-	public ResponseEntity<CreatedCommonResponse> saveComment(@PathVariable(name = "id") int postSeq, @Valid @RequestBody NewCommentRequest request) {
+	public ResponseEntity<CreatedCommonResponse> saveComment(@PathVariable(name = "id") int postSeq, @Valid @RequestBody NewCommentRequest request,
+			Principal principal) {
 		CommonComment comment = anonymousMapper.newRequestToComment(request);
-		// TODO Login id 셋팅하기
-		comment.setUserId(userId);
+		comment.setUserId(principal.getName());
 		comment.setPostSeq(postSeq);
 
 		int seq = anonymousService.save(comment);
@@ -116,10 +113,9 @@ public class AnonymousPostController {
 
 	@PostMapping("/posts/{id}/comments/{commentId}")
 	public ResponseEntity<CreatedCommonResponse> saveSubComment(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
-			@Valid @RequestBody NewCommentRequest request) {
+			@Valid @RequestBody NewCommentRequest request, Principal principal) {
 		CommonComment comment = anonymousMapper.newRequestToComment(request);
-		// TODO Login id 셋팅하기
-		comment.setUserId(userId);
+		comment.setUserId(principal.getName());
 		comment.setPostSeq(postSeq);
 		comment.setSeq(commentSeq);
 
@@ -148,10 +144,9 @@ public class AnonymousPostController {
 
 	@PutMapping("/posts/{id}/comments/{commentId}")
 	public ResponseEntity<CommonResponse> modify(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
-		@Valid	@RequestBody ModifyCommentRequest request) {
+			@Valid @RequestBody ModifyCommentRequest request, Principal principal) {
 		Comment comment = anonymousMapper.modifyRequestToComment(request);
-		// TODO Login id 셋팅하기
-		comment.setUserId(userId);
+		comment.setUserId(principal.getName());
 		comment.setPostSeq(postSeq);
 		comment.setSeq(commentSeq);
 
@@ -163,8 +158,9 @@ public class AnonymousPostController {
 	}
 
 	@DeleteMapping("/posts/{id}/comments/{commentId}")
-	public ResponseEntity<CommonResponse> delete(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq) {
-		anonymousService.delete(userId, postSeq, commentSeq);
+	public ResponseEntity<CommonResponse> delete(@PathVariable(name = "id") int postSeq, @PathVariable(name = "commentId") int commentSeq,
+			Principal principal) {
+		anonymousService.delete(principal.getName(), postSeq, commentSeq);
 
 		CommonResponse body = new CommonResponse();
 		body.setSuccess();

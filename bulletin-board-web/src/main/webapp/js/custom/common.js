@@ -32,6 +32,7 @@ function callAjax(url, type, data, successCallback, errorCallback, completeCallb
   		contentType : "application/json; charset=utf-8",
   		data: param,
   		beforeSend: function(jqXHR, settings) {
+  			jqXHR.setRequestHeader("Authorization", $.cookie("auth"));
   			$("#loadingDiv").fadeIn("slow");
   		},
   		success: function(data, textStatus, jqXHR) {
@@ -67,4 +68,9 @@ function getUrlParam(name) {
 	} else {
 		return null;
 	}
+}
+
+function logout() {
+	$.removeCookie("auth");
+	window.location.replace("/login.html");
 }
