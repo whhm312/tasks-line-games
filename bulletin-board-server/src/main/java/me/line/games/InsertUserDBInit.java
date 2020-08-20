@@ -23,14 +23,14 @@ public class InsertUserDBInit implements CommandLineRunner {
 	public void run(String... arg) throws Exception {
 		List<Object> args = new ArrayList<Object>();
 		args.add("whily312");
-		args.add(passwordEncoder.encode("1"));
+		args.add(passwordEncoder.encode("test"));
 		args.add("whily312@aaa.com");
 
 		userRepository.saveUsers(args);
 
 		args = new ArrayList<Object>();
 		args.add("test");
-		args.add(passwordEncoder.encode("2"));
+		args.add(passwordEncoder.encode("0000"));
 		args.add("user@aaa.com");
 
 		userRepository.saveUsers(args);
