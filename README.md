@@ -2,13 +2,16 @@
 
 ### 1. 프로젝트 소개
 
-1. 게시판 서버 : bulletin-board-server
-2. 게시판 웹 : bulletin-board-web
+1. 게시판 서버 : bulletin-board-server (port:9998)
+   1. Spring Boot, Maven, H2(in memory)
+2. 게시판 웹 : bulletin-board-web (port:8080)
+   1. Spring Boot, Bootstrap, jQuery
 
 ###  2. 프로젝트 구동방법
 
 - 방법 1. STS에서 소스를 빌드 후에 Run - Spring Boot App 으로 구동.
 - 방법 2. Maven 빌드 방법으로 Goals를 spring-boot:run로 설정 후 실행.
+- 브라우저에서 http://localhost:8080 접속.
 
 #### 3. 특징
 

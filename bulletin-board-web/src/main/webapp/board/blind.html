@@ -82,7 +82,7 @@
             <!-- Nav Item - User Information -->
             <li class="nav-item dropdown no-arrow">
               <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <span class="mr-2 d-none d-lg-inline text-gray-600 small">Valerie Luna</span>
+                <span class="mr-2 d-none d-lg-inline text-gray-600 small">메뉴</span>
               </a>
               <!-- Dropdown - User Information -->
               <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in" aria-labelledby="userDropdown">
@@ -130,7 +130,7 @@
               
 				<table class="table" id="articleTable">
 				  <tbody>
-				  	<tr><td colspan="4">데이터가 없습니다.</tr>
+				  	<tr><td colspan="4" class="text-center">데이터가 없습니다.</tr>
 				  </tbody>
 				</table>
 				<nav aria-label="Page navigation example">
@@ -256,6 +256,10 @@
   				html += "<td style=\"width: 15%\">" + value.registerDate + "</td>";
   				html += "</tr>";
 			});
+		} else {
+			html += "<tbody>";
+			html += "<tr><td class=\"text-center\" colspan=\"4\">데이터가 없습니다.</tr>";
+			html += "</tbody>";
 		}
 		
 		$("#articleTable").append(html);
